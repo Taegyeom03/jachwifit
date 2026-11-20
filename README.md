@@ -33,7 +33,10 @@ PRD: Google Docs「PRD」(한 단락 PRD · 6질문)
   - 100g(ml) 기준값을 1회 제공량으로 환산합니다. 가공식품 중 식이섬유 값이 없는 제품은 0으로 둡니다.
   - 어떤 기록을 썼는지는 `nutrition_source`에 식품코드나 중앙값 개수로 적혀 있습니다.
   - 프로틴 음료 · 단백질 두유는 포털에서 받을 수 있는 5만 건 안에 맞는 제품이 없어 임시값입니다. 제품 라벨을 보고 직접 넣어야 합니다.
-- **가격은 아직 임시값입니다.** KAMIS 소매가격 · 참가격 · 편의점 직접 조사 값으로 바꿀 예정입니다. 값을 바꾸면 `price_source`와 `price_date`도 함께 고칩니다.
+- **가격 (51개 중 23개 공공데이터)**: 1회 제공량 기준으로 환산합니다.
+  - 원재료(계란 · 과일 · 고기 등 9개): KAMIS 농축수산물 소매가격(서울, 일별)
+  - 가공식품(즉석밥 · 라면 · 두부 · 우유 등 14개): 한국소비자원 생필품 가격 정보(참가격, 월별) 해당 상품 조사값의 중앙값 (1+1 행사 제외)
+  - 나머지 28개(닭가슴살 · 그릭요거트 · 편의점 상품 · 외식 메뉴 등)는 공공데이터에 없어 임시값입니다. 편의점 · 마트에서 직접 조사해 넣고 `price_source`와 `price_date`를 함께 고칩니다.
 
 ### 공공데이터로 영양 정보 다시 만들기
 
@@ -43,6 +46,17 @@ node scripts/match-public-data.mjs ../public-data     # 음식별 규칙대로 �
 ```
 
 음식을 추가하거나 매칭을 바꾸려면 `scripts/match-public-data.mjs`의 `RULES`를 고칩니다. 실행하면 음식마다 바뀐 칼로리 · 단백질이 출력되니 이상한 값이 없는지 확인합니다.
+
+### 공공데이터로 가격 다시 만들기
+
+KAMIS 인증키는 [kamis.or.kr](https://www.kamis.or.kr) Open API에서 무료로 발급받습니다. 키는 저장소에 넣지 않습니다.
+
+```bash
+KAMIS_CERT_KEY=발급키 KAMIS_CERT_ID=발급ID node scripts/fetch-public-prices.mjs ../public-prices   # KAMIS 당일 + 참가격 최신 월
+node scripts/match-public-prices.mjs ../public-prices                                              # 음식별 규칙대로 가격 갱신
+```
+
+음식별 상품과 환산 비율은 `scripts/match-public-prices.mjs`의 `RULES`에 있습니다.
 
 ## 실행 방법
 

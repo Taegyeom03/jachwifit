@@ -35,8 +35,7 @@ export function searchFoods(query: string, limit = 8): Food[] {
   return FOODS.filter((f) => f.name.replace(/\s/g, "").includes(q)).slice(0, limit);
 }
 
-// 가격 정보가 임시값인지 (공공데이터로 교체 전)
-export const PRICE_IS_TEMPORARY = FOODS.some((f) => isTemporary(f.priceSource));
-export const PRICE_DATE = FOODS[0]?.priceDate ?? "";
+// 가격 공공데이터 기준일 (가장 최근)
+export const PRICE_DATE = FOODS.filter((f) => !isTemporary(f.priceSource)).map((f) => f.priceDate).sort().at(-1) ?? "";
 // 영양 정보 공공데이터 기준일 (가장 최근)
 export const NUTRITION_DATE = FOODS.map((f) => f.nutritionDate).filter(Boolean).sort().at(-1) ?? "";

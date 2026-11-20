@@ -67,8 +67,9 @@ export default function FoodAdder({ defaultMeal, onAdd }: Props) {
                 <button type="button" onClick={() => pick(f)}>
                   <b>{f.name}</b>
                   <span>
-                    {f.servingLabel} · {f.kcal}kcal · 단백질 {f.protein}g
+                    {f.servingLabel} · {f.kcal}kcal · 단백질 {f.protein}g · {f.price.toLocaleString("ko-KR")}원
                     {isTemporary(f.nutritionSource) && " · 영양 임시값"}
+                    {isTemporary(f.priceSource) && " · 가격 임시값"}
                   </span>
                 </button>
               </li>

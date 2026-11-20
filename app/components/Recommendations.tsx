@@ -1,5 +1,10 @@
-import { NUTRITION_DATE, PRICE_DATE, PRICE_IS_TEMPORARY, isTemporary } from "@/lib/foods";
+import { NUTRITION_DATE, PRICE_DATE, isTemporary } from "@/lib/foods";
 import { recommend } from "@/lib/recommend";
+
+function tempLabel(nutritionSource: string, priceSource: string) {
+  const temp = [isTemporary(nutritionSource) && "영양", isTemporary(priceSource) && "가격"].filter(Boolean);
+  return temp.length ? ` (${temp.join(" · ")} 임시값)` : "";
+}
 
 // 100원 단위로 반올림
 const won = (n: number) => `${(Math.round(n / 100) * 100).toLocaleString("ko-KR")}원`;
@@ -39,11 +44,11 @@ export default function Recommendations({ proteinGap, kcalLeft }: { proteinGap: 
             <p className="muted small">부족분의 {Math.round(c.coverage * 100)}% 채움</p>
             <ul className="combo-items">
               {c.items.map((it) => (
-                <li key={it.food.id} title={it.food.nutritionSource}>
+                <li key={it.food.id} title={`영양: ${it.food.nutritionSource}\n가격: ${it.food.priceSource} (${it.food.priceDate})`}>
                   {it.food.name} {it.food.servingLabel} × {it.servings}: 단백질{" "}
                   {Math.round(it.food.protein * it.servings * 10) / 10}g · {Math.round(it.food.kcal * it.servings)}kcal ·{" "}
                   {(it.food.price * it.servings).toLocaleString("ko-KR")}원
-                  {isTemporary(it.food.nutritionSource) && " (영양 임시값)"}
+                  {tempLabel(it.food.nutritionSource, it.food.priceSource)}
                 </li>
               ))}
             </ul>
@@ -51,8 +56,8 @@ export default function Recommendations({ proteinGap, kcalLeft }: { proteinGap: 
         ))}
       </div>
       <p className="muted small">
-        영양 정보: 식품의약품안전처 전국통합식품영양성분정보(공공데이터포털, {NUTRITION_DATE} 기준). 가격 기준일 {PRICE_DATE}
-        {PRICE_IS_TEMPORARY && " · 가격은 아직 임시값이에요."}
+        영양: 식품의약품안전처 전국통합식품영양성분정보({NUTRITION_DATE} 기준). 가격: KAMIS 서울 소매가격 · 한국소비자원
+        생필품 가격(참가격), 최근 {PRICE_DATE}. 공공데이터에 없는 음식은 임시값으로 표시했어요.
       </p>
     </section>
   );
