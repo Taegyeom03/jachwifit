@@ -18,6 +18,7 @@ type Options = {
   proteinGap: number;
   kcalLeft: number;
   includeTags?: string[]; // 하나라도 있는 음식만 (예: 야식)
+  allowCheat?: boolean; // 치팅데이에는 치킨 · 족발 같은 "치팅" 음식도 추천
   maxItems?: number;
   maxServingsEach?: number;
 };
@@ -26,6 +27,7 @@ export function recommend({
   proteinGap,
   kcalLeft,
   includeTags,
+  allowCheat = false,
   maxItems = 3,
   maxServingsEach = 2,
 }: Options): Combo[] {
@@ -37,7 +39,7 @@ export function recommend({
       f.price > 0 &&
       f.kcal > 0 &&
       f.kcal <= kcalLeft &&
-      !f.tags.includes("치팅") &&
+      (allowCheat || !f.tags.includes("치팅")) &&
       (!includeTags || f.tags.some((t) => includeTags.includes(t))),
   );
   // 싸도 단백질이 적은 음식(땅콩버터 · 오트밀 등)은 칼로리만 쓰므로, 100kcal당 단백질 7g 이상을 먼저 쓴다
@@ -111,4 +113,25 @@ function buildCombo(
 
   const kept = items.filter((i) => i.servings > 0);
   return { items: kept, kcal, protein, price, coverage: Math.min(1, protein / proteinGap) };
+}
+
+// 단백질 1g당 가격이 싼 순 (데이터 인사이트)
+export function proteinValueRanking(minProtein = 5): { food: Food; wonPerGram: number }[] {
+  return FOODS.filter((f) => f.protein >= minProtein && f.price > 0)
+    .map((food) => ({ food, wonPerGram: food.price / food.protein }))
+    .sort((a, b) => a.wonPerGram - b.wonPerGram);
+}
+
+// 100kcal당 단백질이 많은 순 (데이터 인사이트)
+export function proteinDensityRanking(minProtein = 3): { food: Food; gramPer100kcal: number }[] {
+  return FOODS.filter((f) => f.protein >= minProtein && f.kcal > 0)
+    .map((food) => ({ food, gramPer100kcal: (food.protein / food.kcal) * 100 }))
+    .sort((a, b) => b.gramPer100kcal - a.gramPer100kcal);
+}
+
+// 남은 칼로리 안에서 먹을 수 있는 가벼운 음식 (야식 · 단백질 목표를 채운 날)
+export function lightSnacks(kcalLeft: number, tags: string[], limit = 5): Food[] {
+  return FOODS.filter((f) => f.kcal <= kcalLeft && f.price > 0 && f.tags.some((t) => tags.includes(t)) && !f.tags.includes("치팅"))
+    .sort((a, b) => b.protein / Math.max(b.kcal, 1) - a.protein / Math.max(a.kcal, 1) || a.kcal - b.kcal)
+    .slice(0, limit);
 }

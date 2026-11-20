@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
-import { dayStatus, dayTotals, entryTotals, type DayStatus } from "@/lib/nutrition";
+import { dayStatus, dayTotals, entryTotals, kcalLimit, type DayStatus } from "@/lib/nutrition";
 import { MEALS, dateKey } from "@/lib/store";
 import { TARGET_COVERAGE, TARGET_DAYS, successStats } from "@/lib/success";
 import { useAppData } from "../useAppData";
@@ -103,7 +103,7 @@ export default function CalendarPage() {
               aria-label={`${Number(k.slice(8))}일 ${STATUS_LABEL[dayStatus(logs[k], goal)]}`}
             >
               {Number(k.slice(8))}
-              <span className={`dot ${dayStatus(logs[k], goal)}`} />
+              {logs[k]?.cheat ? <span className="star">★</span> : <span className={`dot ${dayStatus(logs[k], goal)}`} />}
             </button>
           ) : (
             <span key={`blank-${i}`} />
@@ -121,17 +121,21 @@ export default function CalendarPage() {
         <span>
           <span className="dot over" /> 10% 넘게 초과
         </span>
+        <span>
+          <span className="star">★</span> 치팅데이
+        </span>
       </div>
 
       <section className="panel">
         <h2>
           {Number(selected.slice(5, 7))}월 {Number(selected.slice(8))}일{" "}
           <span className={`status ${status}`}>{STATUS_LABEL[status]}</span>
+          {day?.cheat && <span className="status cheat">★ 치팅데이</span>}
         </h2>
         {day?.entries.length ? (
           <>
             <p>
-              {Math.round(totals.kcal)} / {Math.round(goal.targetKcal)}kcal · 단백질 {Math.round(totals.protein)} /{" "}
+              {Math.round(totals.kcal)} / {Math.round(kcalLimit(goal, day))}kcal · 단백질 {Math.round(totals.protein)} /{" "}
               {Math.round(goal.targetProtein)}g · 식비 {Math.round(totals.price).toLocaleString("ko-KR")}원
             </p>
             {MEALS.map((meal) => {

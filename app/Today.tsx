@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
-import { dayTotals, entryTotals } from "@/lib/nutrition";
+import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
 import { MEALS, dateKey, newId, type Meal } from "@/lib/store";
 import FoodAdder from "./components/FoodAdder";
+import NightSnack from "./components/NightSnack";
 import Recommendations from "./components/Recommendations";
 import { useAppData } from "./useAppData";
 
@@ -29,6 +31,7 @@ function formatDate(key: string) {
 export default function Today() {
   const params = useSearchParams();
   const { ready, profile, logs, updateDay, saveError } = useAppData();
+  const [showSnack, setShowSnack] = useState(false);
 
   const todayKey = dateKey(new Date());
   const requested = params.get("date");
@@ -52,13 +55,16 @@ export default function Today() {
   const goal = calcGoal(profile);
   const day = logs[key];
   const totals = dayTotals(day);
-  const kcalLeft = goal.targetKcal - totals.kcal;
+  const cheat = !!day?.cheat;
+  const limit = kcalLimit(goal, day);
+  const kcalLeft = limit - totals.kcal;
   const proteinGap = goal.targetProtein - totals.protein;
   const lateEnough = !isToday || new Date().getHours() >= 20;
   const tooLittle = lateEnough && totals.kcal > 0 && totals.kcal < goal.bmr * 0.7;
+  const week = isToday ? weekBudget(goal, logs, new Date(), dateKey) : null;
 
   const bars = [
-    { label: "칼로리", unit: "kcal", value: totals.kcal, target: goal.targetKcal, limit: true },
+    { label: "칼로리", unit: "kcal", value: totals.kcal, target: limit, limit: true },
     { label: "단백질", unit: "g", value: totals.protein, target: goal.targetProtein },
     { label: "탄수화물", unit: "g", value: totals.carb, target: goal.targetCarb },
     { label: "지방", unit: "g", value: totals.fat, target: goal.targetFat, limit: true },
@@ -77,6 +83,21 @@ export default function Today() {
           </Link>
         )}
       </div>
+
+      <label className="check cheat-toggle">
+        <input
+          type="checkbox"
+          checked={cheat}
+          onChange={(e) => updateDay(key, (d) => ({ ...d, cheat: e.target.checked || undefined }))}
+        />
+        {isToday ? "오늘은" : "이 날은"} 치팅데이 ★
+      </label>
+      {cheat && (
+        <p className="panel cheat-note small">
+          치팅데이에는 칼로리 상한을 유지 칼로리({Math.round(goal.tdee)}kcal)까지 올려요. 무제한은 아니고, 단백질 목표(
+          {Math.round(goal.targetProtein)}g)는 그대로예요.
+        </p>
+      )}
 
       <section className="panel">
         {bars.map((b) => {
@@ -119,6 +140,27 @@ export default function Today() {
           </p>
         )}
       </section>
+
+      {week && week.over > 0 && (
+        <section className="panel week-budget">
+          <h3>이번 주 칼로리 예산</h3>
+          <p>
+            이번 주(월~오늘) 목표보다 <b>{Math.round(week.over).toLocaleString("ko-KR")}kcal</b> 더 먹었어요
+            {week.cheatDays ? ` (치팅데이 ${week.cheatDays}일 포함)` : ""}.
+          </p>
+          {week.daysLeft === 0 ? (
+            <p className="muted small">오늘이 이번 주 마지막 날이에요. 다음 주는 다시 목표대로 시작하면 돼요.</p>
+          ) : (
+            <p>
+              남은 {week.daysLeft}일 동안 하루 <b>약 {Math.round(week.perDayCut / 10) * 10}kcal</b>씩 줄이면
+              {week.fullyRecoverable ? " 이번 주 예산을 맞출 수 있어요." : " 일부를 되돌릴 수 있어요."}
+            </p>
+          )}
+          <p className="muted small">
+            매일 목표는 바꾸지 않아요. 굶어서 보상하지 말고, 기초대사량({Math.round(goal.bmr)}kcal) 아래로는 줄이지 마세요.
+          </p>
+        </section>
+      )}
 
       <FoodAdder
         defaultMeal={isToday ? mealByHour(new Date().getHours()) : "점심"}
@@ -170,9 +212,15 @@ export default function Today() {
         {!day?.entries.length && <p className="muted">아직 기록이 없어요. 위에서 먹은 음식을 검색해 추가해 보세요.</p>}
       </section>
 
+      <button type="button" className="snack-btn" onClick={() => setShowSnack((s) => !s)} aria-expanded={showSnack}>
+        🌙 {showSnack ? "야식 추천 닫기" : "야식 먹고 싶어"}
+      </button>
+      {showSnack && <NightSnack proteinGap={proteinGap} kcalLeft={kcalLeft} />}
+
       <Recommendations
         proteinGap={proteinGap}
         kcalLeft={kcalLeft}
+        allowCheat={cheat}
         onStat={(stat) => {
           // 기록이 있는 날만, 결과가 바뀌었을 때만 저장 (Q6 성공 지표 측정)
           if (!day?.entries.length || JSON.stringify(day.rec) === JSON.stringify(stat)) return;

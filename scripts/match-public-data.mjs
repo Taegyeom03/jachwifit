@@ -4,6 +4,7 @@
 // 음식마다 규칙(아래 RULES)을 정해 둔다.
 // - code: 공공데이터 식품코드 하나를 그대로 쓴다 (원재료 · 음식)
 // - match: 이름이 맞는 제품 여러 개의 성분별 중앙값을 쓴다 (가공식품처럼 제품이 많은 경우)
+//   all(모두 포함) · exclude(제외) · minKcal(100g당 최소 칼로리, 예: 건면만 고를 때)로 좁힌다
 // 영양 정보는 모두 100g(ml) 기준값을 1회 제공량(serving_g)으로 환산한다. 가격 · 태그 · 제공량은 기존 값을 유지한다.
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -72,6 +73,62 @@ const RULES = [
   { name: "단백질 두유", keepTemp: "임시값(제품 라벨 확인 필요)" },
   { name: "곤약젤리", set: "processed", match: /곤약\s?젤리/ },
   { name: "아메리카노", set: "processed", match: /아메리카노/, exclude: /라떼|스틱|분말|원두|믹스|파우더|캡슐|라테|사탕|캔디|아이스크림|빵|과자|디카페인\s?믹스/ },
+
+  // 2026-11-20 추가 (원재료)
+  { name: "감자", set: "raw", code: "R102-001140046-0000" },
+  { name: "시금치", set: "raw", code: "R106-115000047-0000" },
+  { name: "상추", set: "raw", match: /^상추_.*_생것$/ },
+  { name: "토마토", set: "raw", code: "R106-186000001-0000" },
+  { name: "당근", set: "raw", code: "R106-041007601-0000" },
+  { name: "양파", set: "raw", code: "R106-132000001-0000" },
+  { name: "새송이버섯", set: "raw", code: "R107-023000001-0000" },
+  { name: "돼지 목살", set: "raw", code: "R209-014008401-0000" },
+  { name: "삼겹살", set: "raw", code: "R209-014006601-0000" },
+  { name: "땅콩", set: "raw", code: "R105-007000058-0000" },
+  { name: "호두", set: "raw", code: "R105-035000058-0000" },
+  { name: "블루베리(냉동)", set: "raw", code: "R108-047000008-0000" },
+  { name: "딸기", set: "raw", code: "R108-019020001-0000" },
+  { name: "마른 멸치", set: "raw", code: "R211-105033902-0000" },
+  { name: "흰우유", set: "raw", code: "R213-009000000-0000" },
+  { name: "닭가슴살(생)", set: "raw", code: "R209-008000501-0000" },
+
+  // 2026-11-20 추가 (가공식품)
+  { name: "3분 카레", set: "processed", match: /3분/, all: [/카레/] },
+  { name: "3분 짜장", set: "processed", match: /3분/, all: [/짜장/] },
+  { name: "소면", set: "processed", match: /소면$/, minKcal: 300 },
+  { name: "스파게티면", set: "processed", match: /스파게티(면)?$|파스타$/, minKcal: 300, exclude: /돈까스|볶음|소스|크림|토마토|미트|로제|볼로네제|알리오|까르보|오일/ },
+  { name: "우동", set: "processed", match: /우동$/, exclude: /쯔유|소스|스프|컵|볶음|어묵|사리|간장|곤약/ },
+  { name: "베이컨", set: "processed", match: /베이컨$/, exclude: /칩|맛|김밥|볶음밥|샌드|포카치아|버거|피자|롤|파니니/ },
+  { name: "치킨너겟", set: "processed", match: /(치킨\s?)?너겟$/ },
+  { name: "냉동 돈까스", set: "processed", match: /(돈까스|돈가스)$/, exclude: /소스|김밥|샌드|도시락|덮밥|카레|버거|떡볶이|롤|치즈|미니|양념/ },
+  { name: "맛살", set: "processed", match: /(맛살|크래미)$/, exclude: /계란말이|샐러드|김밥|샌드|볶음/ },
+  { name: "훈제오리", set: "processed", match: /훈제\s?오리(\s?슬라이스)?$/ },
+  { name: "냉동 볶음밥", set: "processed", match: /볶음밥$/, exclude: /닭가슴살|곤약|소스|양념|김밥|컵/ },
+  { name: "즉석 죽", set: "processed", match: /(쇠고기|전복|야채|소고기)\s?죽$/ },
+  { name: "컵밥", set: "processed", match: /컵\s?(밥|반)/ },
+  { name: "프랑크소시지", set: "processed", match: /(프랑크|후랑크)$/ },
+  { name: "편의점 샌드위치", set: "processed", match: /샌드위치$/, exclude: /소스|스프레드|빵$/ },
+  // 식사대용 쉐이크와 단백질 보충제가 섞여 있어 "단백질 쉐이크(분말)"로 부른다
+  { name: "프로틴 파우더", rename: "단백질 쉐이크(분말)", set: "processed", match: /(프로틴|단백질)\s?(파우더|쉐이크)/, exclude: /음료|드링크|바$|RTD/i },
+  { name: "하루견과", set: "processed", match: /하루\s?견과|데일리\s?넛|한줌\s?견과/ },
+  { name: "바나나우유", set: "processed", match: /바나나\s?우유|바나나맛\s?우유/ },
+  { name: "그래놀라", set: "processed", match: /그래놀라$/, exclude: /바$|볼|쿠키|칩/ },
+
+  // 2026-11-20 추가 (음식)
+  { name: "김밥", set: "dish", match: /^김밥_/, exclude: /간편조리/ },
+  { name: "김치찌개", set: "dish", match: /^김치찌개/, exclude: /간편조리/ },
+  { name: "된장찌개", set: "dish", match: /^된장찌개/, exclude: /간편조리/ },
+  { name: "비빔밥", set: "dish", match: /^비빔밥/, exclude: /간편조리/ },
+  { name: "짜장면", set: "dish", match: /^짜장면$/ },
+  { name: "짬뽕", set: "dish", match: /^짬뽕/, exclude: /간편조리/ },
+  { name: "순대", set: "dish", match: /^순대$|^순대_/, exclude: /볶음|국|전골/ },
+  { name: "부대찌개", set: "dish", match: /^부대찌개/, exclude: /간편조리/ },
+  { name: "햄버거", set: "dish", match: /^햄버거_/ },
+  { name: "달걀말이", set: "dish", match: /^달걀말이/ },
+  { name: "카레라이스", set: "dish", match: /^카레라이스/ },
+  { name: "쌀국수", set: "dish", match: /^쌀국수/ },
+  { name: "오므라이스", set: "dish", match: /^오므라이스/ },
+  { name: "제육덮밥", set: "dish", code: "D101-010150000-0001" },
 ];
 
 const NUTRIENTS = { kcal: "ENERC", protein: "PROT", carb: "CHOCDF", fat: "FATCE", fiber: "FIBTG" };
@@ -117,7 +174,8 @@ function resolve(rule) {
       (rule.all ?? []).every((re) => re.test(r.FOOD_NM)) &&
       !(rule.exclude && rule.exclude.test(r.FOOD_NM)) &&
       num(r.ENERC) != null &&
-      num(r.PROT) != null,
+      num(r.PROT) != null &&
+      (!rule.minKcal || num(r.ENERC) >= rule.minKcal),
   );
   // 제품이 너무 적으면 대표값으로 쓰지 않는다 (기존 값 유지)
   if (hits.length < (rule.set === "processed" ? MIN_PRODUCTS : 1)) return null;

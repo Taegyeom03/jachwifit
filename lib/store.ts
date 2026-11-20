@@ -25,6 +25,7 @@ export type RecStat =
 export type DayLog = {
   entries: Entry[];
   rec?: RecStat;
+  cheat?: boolean; // 치팅데이
 };
 
 export type Logs = Record<string, DayLog>; // 키: YYYY-MM-DD
