@@ -25,8 +25,24 @@ PRD: Google Docs「PRD」(한 단락 PRD · 6질문)
 ## 음식 데이터
 
 - `data/foods.csv`가 원본입니다. `npm run dev`와 `npm run build` 전에 `lib/foods.data.json`으로 자동 변환됩니다.
-- 칸: `name, serving_label, serving_g, kcal, protein, carb, fat, fiber, price, price_source, price_date, tags` (영양 · 가격은 1회 제공량 기준, 태그는 `|`로 구분)
-- **지금 51개 음식은 모두 임시값입니다.** 식약처 식품영양성분 DB, KAMIS 소매가격, 참가격, 편의점 직접 조사 값으로 바꿀 예정입니다. 값을 바꾸면 `price_source`와 `price_date`도 함께 고칩니다.
+- 칸: `name, serving_label, serving_g, kcal, protein, carb, fat, fiber, price, price_source, price_date, nutrition_source, nutrition_date, tags` (영양 · 가격은 1회 제공량 기준, 태그는 `|`로 구분)
+- **영양 정보 (51개 중 49개 공공데이터)**: 식품의약품안전처「전국통합식품영양성분정보」표준데이터(공공데이터포털)
+  - 원재료(계란 · 바나나 · 고기 등): 원재료성식품 표준데이터(국가표준식품성분표)의 식품코드 1개
+  - 가공식품(훈제 닭가슴살 · 즉석밥 등): 가공식품 표준데이터에서 이름이 맞는 제품들의 성분별 중앙값
+  - 음식(제육볶음 · 떡볶이 등): 음식 표준데이터의 100g 기준값
+  - 100g(ml) 기준값을 1회 제공량으로 환산합니다. 가공식품 중 식이섬유 값이 없는 제품은 0으로 둡니다.
+  - 어떤 기록을 썼는지는 `nutrition_source`에 식품코드나 중앙값 개수로 적혀 있습니다.
+  - 프로틴 음료 · 단백질 두유는 포털에서 받을 수 있는 5만 건 안에 맞는 제품이 없어 임시값입니다. 제품 라벨을 보고 직접 넣어야 합니다.
+- **가격은 아직 임시값입니다.** KAMIS 소매가격 · 참가격 · 편의점 직접 조사 값으로 바꿀 예정입니다. 값을 바꾸면 `price_source`와 `price_date`도 함께 고칩니다.
+
+### 공공데이터로 영양 정보 다시 만들기
+
+```bash
+node scripts/fetch-public-data.mjs ../public-data     # 공공데이터포털에서 받기 (약 120MB, 저장소에 넣지 않음)
+node scripts/match-public-data.mjs ../public-data     # 음식별 규칙대로 찾아 data/foods.csv 갱신
+```
+
+음식을 추가하거나 매칭을 바꾸려면 `scripts/match-public-data.mjs`의 `RULES`를 고칩니다. 실행하면 음식마다 바뀐 칼로리 · 단백질이 출력되니 이상한 값이 없는지 확인합니다.
 
 ## 실행 방법
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { searchFoods, type Food } from "@/lib/foods";
+import { isTemporary, searchFoods, type Food } from "@/lib/foods";
 import { MEALS, type Meal, type Unit } from "@/lib/store";
 
 type Props = {
@@ -68,6 +68,7 @@ export default function FoodAdder({ defaultMeal, onAdd }: Props) {
                   <b>{f.name}</b>
                   <span>
                     {f.servingLabel} · {f.kcal}kcal · 단백질 {f.protein}g
+                    {isTemporary(f.nutritionSource) && " · 영양 임시값"}
                   </span>
                 </button>
               </li>

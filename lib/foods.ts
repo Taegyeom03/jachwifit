@@ -13,8 +13,12 @@ export type Food = {
   price: number; // 1회 제공량 기준 가격(원)
   priceSource: string;
   priceDate: string;
+  nutritionSource: string; // 공공데이터 식품코드 또는 "임시값(...)"
+  nutritionDate: string;
   tags: string[];
 };
+
+export const isTemporary = (source: string) => source.startsWith("임시값");
 
 export const FOODS: Food[] = data;
 
@@ -32,5 +36,7 @@ export function searchFoods(query: string, limit = 8): Food[] {
 }
 
 // 가격 정보가 임시값인지 (공공데이터로 교체 전)
-export const PRICE_IS_TEMPORARY = FOODS.some((f) => f.priceSource === "임시값");
+export const PRICE_IS_TEMPORARY = FOODS.some((f) => isTemporary(f.priceSource));
 export const PRICE_DATE = FOODS[0]?.priceDate ?? "";
+// 영양 정보 공공데이터 기준일 (가장 최근)
+export const NUTRITION_DATE = FOODS.map((f) => f.nutritionDate).filter(Boolean).sort().at(-1) ?? "";

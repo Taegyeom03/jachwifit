@@ -34,6 +34,8 @@ const foods = lines.map((line, i) => {
     price: row.price,
     priceSource: row.price_source,
     priceDate: row.price_date,
+    nutritionSource: row.nutrition_source ?? "",
+    nutritionDate: row.nutrition_date ?? "",
     tags: row.tags ? row.tags.split("|").map((t) => t.trim()).filter(Boolean) : [],
   };
 });
