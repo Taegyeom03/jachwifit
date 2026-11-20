@@ -1,0 +1,57 @@
+import { PRICE_DATE, PRICE_IS_TEMPORARY } from "@/lib/foods";
+import { recommend } from "@/lib/recommend";
+
+// 100원 단위로 반올림
+const won = (n: number) => `${(Math.round(n / 100) * 100).toLocaleString("ko-KR")}원`;
+
+// 기능 2. 부족한 단백질을 남은 칼로리 안에서 가장 싸게 채우는 조합
+export default function Recommendations({ proteinGap, kcalLeft }: { proteinGap: number; kcalLeft: number }) {
+  if (proteinGap <= 0) {
+    return <p className="panel ok">오늘 단백질 목표를 채웠어요.</p>;
+  }
+  if (kcalLeft <= 0) {
+    return (
+      <p className="panel warning">
+        남은 칼로리가 없어서 추천할 수 있는 음식이 없어요. 오늘은 물이나 무가당 차를 드세요.
+      </p>
+    );
+  }
+
+  const combos = recommend({ proteinGap, kcalLeft });
+  if (!combos.length) {
+    return <p className="panel muted">남은 칼로리({Math.round(kcalLeft)}kcal) 안에서 고를 수 있는 단백질 음식이 없어요.</p>;
+  }
+
+  return (
+    <section>
+      <h2>
+        단백질 {Math.round(proteinGap)}g 채우기 <span className="muted small">남은 칼로리 {Math.round(kcalLeft)}kcal 안에서</span>
+      </h2>
+      <div className="combos">
+        {combos.map((c, i) => (
+          <article key={i} className="panel combo">
+            <p className="combo-title">
+              {c.items.map((it) => `${it.food.name} ${it.servings === 1 ? "" : `×${it.servings}`}`.trim()).join(" + ")}
+            </p>
+            <p className="combo-sum">
+              단백질 <b>{Math.round(c.protein)}g</b> · {Math.round(c.kcal)}kcal · 약 <b>{won(c.price)}</b>
+            </p>
+            <p className="muted small">부족분의 {Math.round(c.coverage * 100)}% 채움</p>
+            <ul className="combo-items">
+              {c.items.map((it) => (
+                <li key={it.food.id}>
+                  {it.food.name} {it.food.servingLabel} × {it.servings}: 단백질 {it.food.protein * it.servings}g ·{" "}
+                  {it.food.kcal * it.servings}kcal · {(it.food.price * it.servings).toLocaleString("ko-KR")}원
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+      <p className="muted small">
+        가격 기준일 {PRICE_DATE}
+        {PRICE_IS_TEMPORARY && " · 지금 가격과 영양 정보는 임시값이에요. 공공데이터로 바꿀 예정이에요."}
+      </p>
+    </section>
+  );
+}

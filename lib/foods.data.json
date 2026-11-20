@@ -1,0 +1,896 @@
+[
+  {
+    "id": 1,
+    "name": "닭가슴살(훈제)",
+    "servingLabel": "1팩(100g)",
+    "servingG": 100,
+    "kcal": 110,
+    "protein": 23,
+    "carb": 1,
+    "fat": 1.5,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "간단조리",
+      "편의점"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "계란",
+    "servingLabel": "1개",
+    "servingG": 50,
+    "kcal": 72,
+    "protein": 6.3,
+    "carb": 0.4,
+    "fat": 4.8,
+    "fiber": 0,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "간단조리"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "구운 계란(편의점)",
+    "servingLabel": "2개",
+    "servingG": 100,
+    "kcal": 150,
+    "protein": 12.5,
+    "carb": 1,
+    "fat": 10,
+    "fiber": 0,
+    "price": 1800,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "두부",
+    "servingLabel": "1/2모(150g)",
+    "servingG": 150,
+    "kcal": 120,
+    "protein": 13,
+    "carb": 3,
+    "fat": 7,
+    "fiber": 1,
+    "price": 800,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "간단조리"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "즉석밥",
+    "servingLabel": "1개(210g)",
+    "servingG": 210,
+    "kcal": 315,
+    "protein": 5,
+    "carb": 70,
+    "fat": 1,
+    "fiber": 1,
+    "price": 1200,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리",
+      "편의점"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "현미 즉석밥",
+    "servingLabel": "1개(210g)",
+    "servingG": 210,
+    "kcal": 310,
+    "protein": 6,
+    "carb": 66,
+    "fat": 2.5,
+    "fiber": 3,
+    "price": 1700,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "그릭요거트(무가당)",
+    "servingLabel": "1개(100g)",
+    "servingG": 100,
+    "kcal": 90,
+    "protein": 10,
+    "carb": 4,
+    "fat": 3.5,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "저지방 우유",
+    "servingLabel": "1팩(200ml)",
+    "servingG": 200,
+    "kcal": 80,
+    "protein": 6.5,
+    "carb": 10,
+    "fat": 2,
+    "fiber": 0,
+    "price": 900,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "무가당 두유",
+    "servingLabel": "1팩(190ml)",
+    "servingG": 190,
+    "kcal": 90,
+    "protein": 7,
+    "carb": 4,
+    "fat": 5,
+    "fiber": 1,
+    "price": 800,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "바나나",
+    "servingLabel": "1개",
+    "servingG": 120,
+    "kcal": 105,
+    "protein": 1.3,
+    "carb": 27,
+    "fat": 0.4,
+    "fiber": 3,
+    "price": 500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "편의점"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "고구마",
+    "servingLabel": "1개(150g)",
+    "servingG": 150,
+    "kcal": 190,
+    "protein": 2.4,
+    "carb": 45,
+    "fat": 0.2,
+    "fiber": 4.5,
+    "price": 800,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "간단조리"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "방울토마토",
+    "servingLabel": "10개",
+    "servingG": 150,
+    "kcal": 30,
+    "protein": 1.4,
+    "carb": 6,
+    "fat": 0.3,
+    "fiber": 1.8,
+    "price": 1000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "야식"
+    ]
+  },
+  {
+    "id": 13,
+    "name": "참치캔(라이트)",
+    "servingLabel": "1캔(100g)",
+    "servingG": 100,
+    "kcal": 120,
+    "protein": 20,
+    "carb": 0,
+    "fat": 4,
+    "fiber": 0,
+    "price": 1800,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리",
+      "편의점"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "고등어캔",
+    "servingLabel": "1/2캔(150g)",
+    "servingG": 150,
+    "kcal": 280,
+    "protein": 30,
+    "carb": 0,
+    "fat": 18,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "프로틴 음료",
+    "servingLabel": "1병(250ml)",
+    "servingG": 250,
+    "kcal": 120,
+    "protein": 20,
+    "carb": 7,
+    "fat": 1.5,
+    "fiber": 0,
+    "price": 2500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  },
+  {
+    "id": 16,
+    "name": "단백질바",
+    "servingLabel": "1개(45g)",
+    "servingG": 45,
+    "kcal": 180,
+    "protein": 12,
+    "carb": 20,
+    "fat": 6,
+    "fiber": 3,
+    "price": 2000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 17,
+    "name": "오트밀",
+    "servingLabel": "1회(40g)",
+    "servingG": 40,
+    "kcal": 150,
+    "protein": 5,
+    "carb": 27,
+    "fat": 2.7,
+    "fiber": 4,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료",
+      "간단조리"
+    ]
+  },
+  {
+    "id": 18,
+    "name": "닭가슴살 소시지",
+    "servingLabel": "1개(70g)",
+    "servingG": 70,
+    "kcal": 110,
+    "protein": 12,
+    "carb": 4,
+    "fat": 5,
+    "fiber": 0,
+    "price": 1200,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 19,
+    "name": "스트링치즈",
+    "servingLabel": "1개(20g)",
+    "servingG": 20,
+    "kcal": 60,
+    "protein": 5,
+    "carb": 0.5,
+    "fat": 4,
+    "fiber": 0,
+    "price": 700,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 20,
+    "name": "아몬드",
+    "servingLabel": "1줌(20g)",
+    "servingG": 20,
+    "kcal": 120,
+    "protein": 4.2,
+    "carb": 4,
+    "fat": 10.5,
+    "fiber": 2.5,
+    "price": 400,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 21,
+    "name": "브로콜리",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 34,
+    "protein": 2.8,
+    "carb": 7,
+    "fat": 0.4,
+    "fiber": 2.6,
+    "price": 600,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 22,
+    "name": "양배추",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 25,
+    "protein": 1.3,
+    "carb": 6,
+    "fat": 0.1,
+    "fiber": 2.5,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 23,
+    "name": "참치마요 삼각김밥",
+    "servingLabel": "1개(110g)",
+    "servingG": 110,
+    "kcal": 220,
+    "protein": 5,
+    "carb": 35,
+    "fat": 6.5,
+    "fiber": 1,
+    "price": 1300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 24,
+    "name": "편의점 샐러드",
+    "servingLabel": "1개(150g)",
+    "servingG": 150,
+    "kcal": 120,
+    "protein": 4,
+    "carb": 12,
+    "fat": 6,
+    "fiber": 3,
+    "price": 3500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  },
+  {
+    "id": 25,
+    "name": "닭가슴살 샐러드(편의점)",
+    "servingLabel": "1개(200g)",
+    "servingG": 200,
+    "kcal": 200,
+    "protein": 20,
+    "carb": 12,
+    "fat": 8,
+    "fiber": 3,
+    "price": 4500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  },
+  {
+    "id": 26,
+    "name": "컵라면",
+    "servingLabel": "1개(110g)",
+    "servingG": 110,
+    "kcal": 500,
+    "protein": 10,
+    "carb": 65,
+    "fat": 22,
+    "fiber": 2,
+    "price": 1300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식",
+      "치팅"
+    ]
+  },
+  {
+    "id": 27,
+    "name": "라면",
+    "servingLabel": "1봉(120g)",
+    "servingG": 120,
+    "kcal": 500,
+    "protein": 10,
+    "carb": 79,
+    "fat": 16,
+    "fiber": 3,
+    "price": 900,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리",
+      "야식",
+      "치팅"
+    ]
+  },
+  {
+    "id": 28,
+    "name": "김치",
+    "servingLabel": "1회(50g)",
+    "servingG": 50,
+    "kcal": 15,
+    "protein": 1,
+    "carb": 2.5,
+    "fat": 0.3,
+    "fiber": 1.2,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 29,
+    "name": "조미김",
+    "servingLabel": "1봉(5g)",
+    "servingG": 5,
+    "kcal": 25,
+    "protein": 1.2,
+    "carb": 1,
+    "fat": 2,
+    "fiber": 0.6,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  },
+  {
+    "id": 30,
+    "name": "돼지 앞다리살",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 180,
+    "protein": 19,
+    "carb": 0,
+    "fat": 11,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 31,
+    "name": "소고기 홍두깨살",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 140,
+    "protein": 22,
+    "carb": 0,
+    "fat": 5,
+    "fiber": 0,
+    "price": 3500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 32,
+    "name": "연어(냉동)",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 200,
+    "protein": 20,
+    "carb": 0,
+    "fat": 13,
+    "fiber": 0,
+    "price": 3500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 33,
+    "name": "오징어(냉동)",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 90,
+    "protein": 18,
+    "carb": 2,
+    "fat": 1,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 34,
+    "name": "콩나물",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 30,
+    "protein": 3,
+    "carb": 4,
+    "fat": 1,
+    "fiber": 2,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 35,
+    "name": "콘플레이크",
+    "servingLabel": "1회(30g)",
+    "servingG": 30,
+    "kcal": 115,
+    "protein": 2,
+    "carb": 26,
+    "fat": 0.2,
+    "fiber": 1,
+    "price": 300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 36,
+    "name": "식빵",
+    "servingLabel": "1장(35g)",
+    "servingG": 35,
+    "kcal": 95,
+    "protein": 3,
+    "carb": 17,
+    "fat": 1.5,
+    "fiber": 0.8,
+    "price": 250,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 37,
+    "name": "땅콩버터",
+    "servingLabel": "1큰술(16g)",
+    "servingG": 16,
+    "kcal": 95,
+    "protein": 4,
+    "carb": 3,
+    "fat": 8,
+    "fiber": 1,
+    "price": 250,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 38,
+    "name": "사과",
+    "servingLabel": "1개(200g)",
+    "servingG": 200,
+    "kcal": 105,
+    "protein": 0.5,
+    "carb": 28,
+    "fat": 0.3,
+    "fiber": 4.8,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 39,
+    "name": "귤",
+    "servingLabel": "2개(150g)",
+    "servingG": 150,
+    "kcal": 60,
+    "protein": 1,
+    "carb": 15,
+    "fat": 0.2,
+    "fiber": 2,
+    "price": 600,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "원재료"
+    ]
+  },
+  {
+    "id": 40,
+    "name": "후라이드 치킨",
+    "servingLabel": "2조각(150g)",
+    "servingG": 150,
+    "kcal": 450,
+    "protein": 30,
+    "carb": 15,
+    "fat": 30,
+    "fiber": 0,
+    "price": 4500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "치팅",
+      "야식"
+    ]
+  },
+  {
+    "id": 41,
+    "name": "족발",
+    "servingLabel": "1인분(200g)",
+    "servingG": 200,
+    "kcal": 450,
+    "protein": 48,
+    "carb": 4,
+    "fat": 26,
+    "fiber": 0,
+    "price": 9000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "치팅",
+      "야식"
+    ]
+  },
+  {
+    "id": 42,
+    "name": "떡볶이",
+    "servingLabel": "1인분(300g)",
+    "servingG": 300,
+    "kcal": 480,
+    "protein": 9,
+    "carb": 95,
+    "fat": 6,
+    "fiber": 3,
+    "price": 4000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "치팅",
+      "야식"
+    ]
+  },
+  {
+    "id": 43,
+    "name": "피자",
+    "servingLabel": "2조각(200g)",
+    "servingG": 200,
+    "kcal": 540,
+    "protein": 22,
+    "carb": 64,
+    "fat": 22,
+    "fiber": 3,
+    "price": 6000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "치팅",
+      "야식"
+    ]
+  },
+  {
+    "id": 44,
+    "name": "제육볶음 정식",
+    "servingLabel": "1인분(450g)",
+    "servingG": 450,
+    "kcal": 750,
+    "protein": 30,
+    "carb": 95,
+    "fat": 25,
+    "fiber": 4,
+    "price": 8000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "치팅"
+    ]
+  },
+  {
+    "id": 45,
+    "name": "순두부찌개",
+    "servingLabel": "1인분(400g)",
+    "servingG": 400,
+    "kcal": 250,
+    "protein": 15,
+    "carb": 10,
+    "fat": 16,
+    "fiber": 2,
+    "price": 8000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": []
+  },
+  {
+    "id": 46,
+    "name": "닭가슴살 볶음밥(냉동)",
+    "servingLabel": "1봉(250g)",
+    "servingG": 250,
+    "kcal": 350,
+    "protein": 18,
+    "carb": 55,
+    "fat": 6,
+    "fiber": 2,
+    "price": 2500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리",
+      "편의점"
+    ]
+  },
+  {
+    "id": 47,
+    "name": "냉동 만두",
+    "servingLabel": "5개(120g)",
+    "servingG": 120,
+    "kcal": 280,
+    "protein": 10,
+    "carb": 35,
+    "fat": 10,
+    "fiber": 2,
+    "price": 1200,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리",
+      "야식"
+    ]
+  },
+  {
+    "id": 48,
+    "name": "어묵",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 140,
+    "protein": 8,
+    "carb": 15,
+    "fat": 5,
+    "fiber": 0,
+    "price": 700,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 49,
+    "name": "단백질 두유",
+    "servingLabel": "1팩(190ml)",
+    "servingG": 190,
+    "kcal": 120,
+    "protein": 10,
+    "carb": 10,
+    "fat": 4,
+    "fiber": 1,
+    "price": 1300,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  },
+  {
+    "id": 50,
+    "name": "곤약젤리",
+    "servingLabel": "1개(150g)",
+    "servingG": 150,
+    "kcal": 10,
+    "protein": 0,
+    "carb": 3,
+    "fat": 0,
+    "fiber": 1,
+    "price": 800,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점",
+      "야식"
+    ]
+  },
+  {
+    "id": 51,
+    "name": "아메리카노",
+    "servingLabel": "1잔(350ml)",
+    "servingG": 350,
+    "kcal": 10,
+    "protein": 0.5,
+    "carb": 1.5,
+    "fat": 0,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-20",
+    "tags": [
+      "편의점"
+    ]
+  }
+]

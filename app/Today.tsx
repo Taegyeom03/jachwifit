@@ -1,0 +1,176 @@
+"use client";
+
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { findFood } from "@/lib/foods";
+import { calcGoal } from "@/lib/goal";
+import { dayTotals, entryTotals } from "@/lib/nutrition";
+import { MEALS, dateKey, newId, type Meal } from "@/lib/store";
+import FoodAdder from "./components/FoodAdder";
+import Recommendations from "./components/Recommendations";
+import { useAppData } from "./useAppData";
+
+// 지금 시각에 맞는 기본 끼니
+function mealByHour(h: number): Meal {
+  if (h < 10) return "아침";
+  if (h < 15) return "점심";
+  if (h < 17) return "간식";
+  if (h < 21) return "저녁";
+  return "야식";
+}
+
+function formatDate(key: string) {
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+}
+
+// 기능 1. 목표 대비 식사 기록 + 기능 2. 추천 카드
+export default function Today() {
+  const params = useSearchParams();
+  const { ready, profile, logs, updateDay, saveError } = useAppData();
+
+  const todayKey = dateKey(new Date());
+  const requested = params.get("date");
+  const key = requested && /^\d{4}-\d{2}-\d{2}$/.test(requested) ? requested : todayKey;
+  const isToday = key === todayKey;
+
+  if (!ready) return <p className="muted">불러오는 중…</p>;
+
+  if (!profile) {
+    return (
+      <section className="panel center">
+        <h1>자취핏</h1>
+        <p>목표 칼로리와 단백질을 먼저 계산해야 기록을 시작할 수 있어요.</p>
+        <Link href="/setup" className="button primary">
+          목표 설정하기
+        </Link>
+      </section>
+    );
+  }
+
+  const goal = calcGoal(profile);
+  const day = logs[key];
+  const totals = dayTotals(day);
+  const kcalLeft = goal.targetKcal - totals.kcal;
+  const proteinGap = goal.targetProtein - totals.protein;
+  const lateEnough = !isToday || new Date().getHours() >= 20;
+  const tooLittle = lateEnough && totals.kcal > 0 && totals.kcal < goal.bmr * 0.7;
+
+  const bars = [
+    { label: "칼로리", unit: "kcal", value: totals.kcal, target: goal.targetKcal, limit: true },
+    { label: "단백질", unit: "g", value: totals.protein, target: goal.targetProtein },
+    { label: "탄수화물", unit: "g", value: totals.carb, target: goal.targetCarb },
+    { label: "지방", unit: "g", value: totals.fat, target: goal.targetFat, limit: true },
+    { label: "식이섬유", unit: "g", value: totals.fiber, target: goal.targetFiber },
+  ];
+
+  return (
+    <>
+      <div className="day-head">
+        <h1>{isToday ? "오늘" : formatDate(key)}</h1>
+        {isToday ? (
+          <span className="muted">{formatDate(key)}</span>
+        ) : (
+          <Link href="/" className="small">
+            오늘로 돌아가기
+          </Link>
+        )}
+      </div>
+
+      <section className="panel">
+        {bars.map((b) => {
+          const pct = Math.min(100, (b.value / b.target) * 100);
+          const over = b.limit && b.value > b.target;
+          return (
+            <div key={b.label} className="bar-row">
+              <span className="bar-label">{b.label}</span>
+              <div className="bar">
+                <div className={`bar-fill${over ? " over" : ""}`} style={{ width: `${pct}%` }} />
+              </div>
+              <span className="bar-value">
+                {Math.round(b.value)} / {Math.round(b.target)}
+                {b.unit}
+              </span>
+            </div>
+          );
+        })}
+        <p className="gap-line">
+          {proteinGap > 0 ? (
+            <>
+              단백질 <b>{Math.round(proteinGap)}g 부족</b>
+            </>
+          ) : (
+            <>단백질 목표 달성</>
+          )}
+          {" · "}
+          {kcalLeft >= 0 ? (
+            <>
+              남은 칼로리 <b>{Math.round(kcalLeft)}kcal</b>
+            </>
+          ) : (
+            <span className="over-text">칼로리 {Math.round(-kcalLeft)}kcal 초과</span>
+          )}
+          {" · "}식비 {Math.round(totals.price).toLocaleString("ko-KR")}원
+        </p>
+        {tooLittle && (
+          <p className="warning">
+            너무 적게 드셨어요. 기초대사량({Math.round(goal.bmr)}kcal)보다 많이 적게 먹으면 근손실과 폭식으로 이어지기 쉬워요.
+          </p>
+        )}
+      </section>
+
+      <FoodAdder
+        defaultMeal={isToday ? mealByHour(new Date().getHours()) : "점심"}
+        onAdd={(foodId, amount, unit, meal) =>
+          updateDay(key, (d) => ({ ...d, entries: [...d.entries, { id: newId(), foodId, amount, unit, meal }] }))
+        }
+      />
+      {saveError && <p className="error">이 브라우저에서는 기록을 저장할 수 없어요. 시크릿 모드인지 확인해 주세요.</p>}
+
+      <section className="meals">
+        {MEALS.map((meal) => {
+          const entries = (day?.entries ?? []).filter((e) => e.meal === meal);
+          if (!entries.length) return null;
+          return (
+            <div key={meal} className="panel meal">
+              <h3>{meal}</h3>
+              <ul>
+                {entries.map((e) => {
+                  const food = findFood(e.foodId);
+                  const t = entryTotals(e);
+                  return (
+                    <li key={e.id}>
+                      <span>
+                        {food?.name ?? "삭제된 음식"}{" "}
+                        <span className="muted small">
+                          {e.unit === "g" ? `${e.amount}g` : `${food?.servingLabel ?? ""} × ${e.amount}`}
+                        </span>
+                      </span>
+                      <span className="muted small">
+                        {t ? `${Math.round(t.kcal)}kcal · 단백질 ${Math.round(t.protein)}g` : ""}
+                      </span>
+                      <button
+                        type="button"
+                        className="link danger"
+                        aria-label={`${food?.name ?? "음식"} 삭제`}
+                        onClick={() =>
+                          updateDay(key, (d) => ({ ...d, entries: d.entries.filter((x) => x.id !== e.id) }))
+                        }
+                      >
+                        삭제
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
+        {!day?.entries.length && <p className="muted">아직 기록이 없어요. 위에서 먹은 음식을 검색해 추가해 보세요.</p>}
+      </section>
+
+      <Recommendations proteinGap={proteinGap} kcalLeft={kcalLeft} />
+    </>
+  );
+}

@@ -1,0 +1,8 @@
+# Netlify 빌드 설정 — Next.js 앱으로 빌드하고 .next를 배포한다
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# 페이지가 서버에서 동작하도록 Next.js 런타임 플러그인을 명시한다
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
