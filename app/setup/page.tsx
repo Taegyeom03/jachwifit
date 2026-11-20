@@ -4,11 +4,15 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   ACTIVITY_LEVELS,
+  AMDR,
+  KDRI_SOURCE,
   WEEKLY_LOSS_OPTIONS,
   calcGoal,
   validateProfile,
   type Profile,
 } from "@/lib/goal";
+
+const fmt = (n: number) => Math.round(n).toLocaleString("ko-KR");
 import { useAppData } from "../useAppData";
 
 type Form = Record<keyof Profile, string>;
@@ -172,8 +176,50 @@ export default function SetupPage() {
               {w}
             </p>
           ))}
+
+          <h3 className="sub">계산 과정</h3>
+          <ul className="formula">
+            <li>
+              기초대사량 = 10×{draft.weightKg} + 6.25×{draft.heightCm} − 5×{draft.age}{" "}
+              {draft.sex === "male" ? "+ 5" : "− 161"} = <b>{fmt(goal.bmr)}kcal</b>
+            </li>
+            <li>
+              하루 소비 = {fmt(goal.bmr)} × {goal.activityFactor} ({ACTIVITY_LEVELS[draft.activity].label}) ={" "}
+              <b>{fmt(goal.tdee)}kcal</b>
+            </li>
+            <li>
+              목표 섭취 = {fmt(goal.tdee)} − {fmt(goal.wantDeficit)} (주 {draft.weeklyLossKg}kg × 7,700 ÷ 7)
+              {goal.floorApplied ? ` → 기초대사량 ${fmt(goal.bmr)} 아래라 기초대사량으로` : ""} ={" "}
+              <b>{fmt(goal.targetKcal)}kcal</b>
+            </li>
+            <li>
+              목표 단백질 = {draft.weightKg}kg × {draft.proteinPerKg}g = <b>{fmt(goal.targetProtein)}g</b>
+            </li>
+            {goal.weeks && (
+              <li>
+                예상 기간 = ({draft.weightKg} − {draft.targetWeightKg})kg × 7,700 ÷ ({fmt(goal.dailyDeficit)} × 7) ={" "}
+                <b>약 {goal.weeks}주</b>
+              </li>
+            )}
+          </ul>
+
+          <h3 className="sub">영양소 목표</h3>
+          <ul className="formula">
+            <li>
+              탄수화물 {fmt(goal.targetCarb)}g ({goal.macroPct.carb.toFixed(0)}%) · 단백질 {fmt(goal.targetProtein)}g (
+              {goal.macroPct.protein.toFixed(0)}%) · 지방 {fmt(goal.targetFat)}g ({goal.macroPct.fat.toFixed(0)}%)
+            </li>
+            <li>
+              권장 에너지 비율: 탄수화물 {AMDR.carb[0]}~{AMDR.carb[1]}% · 단백질 {AMDR.protein[0]}~{AMDR.protein[1]}% · 지방{" "}
+              {AMDR.fat[0]}~{AMDR.fat[1]}% (지방은 25%로 두고, 남은 칼로리를 탄수화물로)
+            </li>
+            <li>
+              식이섬유 {goal.targetFiber}g ({draft.sex === "male" ? "남자" : "여자"} {draft.age}세 충분섭취량)
+            </li>
+          </ul>
           <p className="muted small">
-            기초대사량은 Mifflin-St Jeor 공식, 1kg = 7,700kcal로 계산했어요. 일반적인 추정치이며 의료 조언이 아니에요.
+            기초대사량은 Mifflin-St Jeor 공식, 영양소 기준은 {KDRI_SOURCE}이에요. 일반적인 추정치이며 의료 조언이
+            아니에요.
           </p>
         </section>
       )}

@@ -170,7 +170,15 @@ export default function Today() {
         {!day?.entries.length && <p className="muted">아직 기록이 없어요. 위에서 먹은 음식을 검색해 추가해 보세요.</p>}
       </section>
 
-      <Recommendations proteinGap={proteinGap} kcalLeft={kcalLeft} />
+      <Recommendations
+        proteinGap={proteinGap}
+        kcalLeft={kcalLeft}
+        onStat={(stat) => {
+          // 기록이 있는 날만, 결과가 바뀌었을 때만 저장 (Q6 성공 지표 측정)
+          if (!day?.entries.length || JSON.stringify(day.rec) === JSON.stringify(stat)) return;
+          updateDay(key, (d) => ({ ...d, rec: stat }));
+        }}
+      />
     </>
   );
 }

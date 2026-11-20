@@ -6,6 +6,7 @@ import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayStatus, dayTotals, entryTotals, type DayStatus } from "@/lib/nutrition";
 import { MEALS, dateKey } from "@/lib/store";
+import { TARGET_COVERAGE, TARGET_DAYS, successStats } from "@/lib/success";
 import { useAppData } from "../useAppData";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -45,6 +46,7 @@ export default function CalendarPage() {
 
   // 이번 달 기록한 날 수
   const loggedDays = cells.filter((k) => k && logs[k]?.entries.length).length;
+  const success = successStats(logs, today);
 
   const day = logs[selected];
   const totals = dayTotals(day);
@@ -64,6 +66,26 @@ export default function CalendarPage() {
         </button>
       </div>
       <p className="muted small">이번 달 기록한 날 {loggedDays}일</p>
+
+      <section className="panel goal-check">
+        <h2>성공 지표 (최근 7일)</h2>
+        <ul>
+          <li className={success.loggedDays >= TARGET_DAYS ? "pass" : ""}>
+            {success.loggedDays >= TARGET_DAYS ? "✅" : "⬜"} 7일 연속 기록: {success.loggedDays}/{TARGET_DAYS}일 기록 · 연속{" "}
+            {success.streak}일
+          </li>
+          <li className={success.shownDays > 0 && success.overCount === 0 ? "pass" : ""}>
+            {success.shownDays === 0 ? "⬜" : success.overCount === 0 ? "✅" : "❌"} 추천이 남은 칼로리를 넘은 경우:{" "}
+            {success.overCount}건
+          </li>
+          <li className={success.avgCoverage != null && success.avgCoverage >= TARGET_COVERAGE ? "pass" : ""}>
+            {success.avgCoverage == null ? "⬜" : success.avgCoverage >= TARGET_COVERAGE ? "✅" : "❌"} 단백질 부족분 평균 충족:{" "}
+            {success.avgCoverage == null ? "-" : `${Math.round(success.avgCoverage * 100)}%`} (목표 80% · 추천을 본 날{" "}
+            {success.shownDays}일)
+          </li>
+        </ul>
+        <p className="muted small">추천 결과는 그날 오늘 화면에서 마지막으로 본 첫 번째 추천 조합 기준이에요.</p>
+      </section>
 
       <div className="calendar panel">
         {WEEKDAYS.map((w) => (

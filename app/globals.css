@@ -391,6 +391,56 @@ button.danger:hover {
   color: var(--muted);
 }
 
+.combo-items li {
+  margin-bottom: 4px;
+}
+
+.source {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.source.temp {
+  color: var(--warn-text);
+}
+
+/* 목표 설정 계산 과정 */
+h3.sub {
+  margin: 16px 0 4px;
+  color: var(--text);
+}
+
+.formula {
+  margin: 0;
+  padding: 10px 12px 10px 28px;
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.formula li {
+  margin: 2px 0;
+}
+
+/* 성공 지표 */
+.goal-check ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.goal-check li {
+  padding: 4px 0;
+}
+
+.goal-check li.pass {
+  color: var(--good);
+  font-weight: 600;
+}
+
 /* 캘린더 */
 .cal-head {
   display: flex;

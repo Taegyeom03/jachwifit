@@ -15,8 +15,16 @@ export type Entry = {
   meal: Meal;
 };
 
+// 그날 마지막으로 본 추천 결과 (PRD Q6 성공 지표 측정용)
+// met: 단백질 목표 달성 · noKcal: 남은 칼로리 없음 · shown: 추천을 보여 줌
+export type RecStat =
+  | { status: "met" }
+  | { status: "noKcal" }
+  | { status: "shown"; coverage: number; over: number };
+
 export type DayLog = {
   entries: Entry[];
+  rec?: RecStat;
 };
 
 export type Logs = Record<string, DayLog>; // 키: YYYY-MM-DD

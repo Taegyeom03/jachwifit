@@ -20,6 +20,26 @@ export type Food = {
 
 export const isTemporary = (source: string) => source.startsWith("임시값");
 
+// 화면에 보여 줄 짧은 출처 (foods.csv의 긴 출처 문장에서 만든다)
+export function nutritionLabel(f: Food): string {
+  const s = f.nutritionSource;
+  if (isTemporary(s)) return "영양 임시값";
+  if (s.startsWith("원재료성식품")) return "영양 국가표준식품성분표";
+  const median = s.match(/^가공식품 (\d+)개 중앙값/);
+  if (median) return `영양 식약처 가공식품 ${median[1]}개 중앙값`;
+  if (s.startsWith("음식")) return "영양 식약처 음식 DB";
+  return `영양 ${s}`;
+}
+
+export function priceLabel(f: Food): string {
+  const s = f.priceSource;
+  if (isTemporary(s)) return "가격 임시값";
+  if (s.startsWith("KAMIS")) return `가격 KAMIS 서울 소매 (${f.priceDate.slice(5).replace("-", "/")})`;
+  const chamga = s.match(/(\d+)건 중앙값/);
+  if (s.startsWith("참가격") && chamga) return `가격 참가격 ${chamga[1]}건 중앙값 (${f.priceDate})`;
+  return `가격 ${s}`;
+}
+
 export const FOODS: Food[] = data;
 
 const byId = new Map(FOODS.map((f) => [f.id, f]));

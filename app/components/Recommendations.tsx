@@ -1,16 +1,39 @@
-import { NUTRITION_DATE, PRICE_DATE, isTemporary } from "@/lib/foods";
-import { recommend } from "@/lib/recommend";
+"use client";
 
-function tempLabel(nutritionSource: string, priceSource: string) {
-  const temp = [isTemporary(nutritionSource) && "영양", isTemporary(priceSource) && "가격"].filter(Boolean);
-  return temp.length ? ` (${temp.join(" · ")} 임시값)` : "";
-}
+import { useEffect } from "react";
+import { NUTRITION_DATE, PRICE_DATE, isTemporary, nutritionLabel, priceLabel } from "@/lib/foods";
+import { recommend } from "@/lib/recommend";
+import type { RecStat } from "@/lib/store";
 
 // 100원 단위로 반올림
 const won = (n: number) => `${(Math.round(n / 100) * 100).toLocaleString("ko-KR")}원`;
 
+type Props = {
+  proteinGap: number;
+  kcalLeft: number;
+  onStat?: (stat: RecStat) => void; // 성공 지표 측정용으로 지금 보여 주는 추천 결과를 알린다
+};
+
 // 기능 2. 부족한 단백질을 남은 칼로리 안에서 가장 싸게 채우는 조합
-export default function Recommendations({ proteinGap, kcalLeft }: { proteinGap: number; kcalLeft: number }) {
+export default function Recommendations({ proteinGap, kcalLeft, onStat }: Props) {
+  const combos = proteinGap > 0 && kcalLeft > 0 ? recommend({ proteinGap, kcalLeft }) : [];
+  const stat: RecStat =
+    proteinGap <= 0
+      ? { status: "met" }
+      : kcalLeft <= 0
+        ? { status: "noKcal" }
+        : {
+            status: "shown",
+            coverage: Math.round((combos[0]?.coverage ?? 0) * 1000) / 1000,
+            over: combos.filter((c) => c.kcal > kcalLeft).length,
+          };
+  const statKey = JSON.stringify(stat);
+
+  useEffect(() => {
+    // onStat은 렌더마다 새로 만들어지므로 결과가 바뀔 때만 알린다
+    onStat?.(JSON.parse(statKey));
+  }, [statKey]);
+
   if (proteinGap <= 0) {
     return <p className="panel ok">오늘 단백질 목표를 채웠어요.</p>;
   }
@@ -22,7 +45,6 @@ export default function Recommendations({ proteinGap, kcalLeft }: { proteinGap: 
     );
   }
 
-  const combos = recommend({ proteinGap, kcalLeft });
   if (!combos.length) {
     return <p className="panel muted">남은 칼로리({Math.round(kcalLeft)}kcal) 안에서 고를 수 있는 단백질 음식이 없어요.</p>;
   }
@@ -48,7 +70,9 @@ export default function Recommendations({ proteinGap, kcalLeft }: { proteinGap: 
                   {it.food.name} {it.food.servingLabel} × {it.servings}: 단백질{" "}
                   {Math.round(it.food.protein * it.servings * 10) / 10}g · {Math.round(it.food.kcal * it.servings)}kcal ·{" "}
                   {(it.food.price * it.servings).toLocaleString("ko-KR")}원
-                  {tempLabel(it.food.nutritionSource, it.food.priceSource)}
+                  <span className={`source${isTemporary(it.food.priceSource) || isTemporary(it.food.nutritionSource) ? " temp" : ""}`}>
+                    {nutritionLabel(it.food)} · {priceLabel(it.food)}
+                  </span>
                 </li>
               ))}
             </ul>
