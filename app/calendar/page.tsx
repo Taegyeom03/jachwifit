@@ -7,6 +7,7 @@ import { calcGoal } from "@/lib/goal";
 import { dayStatus, dayTotals, entryTotals, kcalLimit, type DayStatus } from "@/lib/nutrition";
 import { MEALS, dateKey } from "@/lib/store";
 import { TARGET_COVERAGE, TARGET_DAYS, successStats } from "@/lib/success";
+import WeightInput from "../components/WeightInput";
 import { useAppData } from "../useAppData";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -20,7 +21,7 @@ const STATUS_LABEL: Record<DayStatus, string> = {
 
 // 기능 3. 월간 캘린더 + 날짜별 상세
 export default function CalendarPage() {
-  const { ready, profile, logs } = useAppData();
+  const { ready, profile, logs, updateDay } = useAppData();
   const today = new Date();
   const [month, setMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(() => dateKey(today));
@@ -100,9 +101,10 @@ export default function CalendarPage() {
               type="button"
               className={`cal-day${k === selected ? " selected" : ""}${k === dateKey(today) ? " today" : ""}`}
               onClick={() => setSelected(k)}
-              aria-label={`${Number(k.slice(8))}일 ${STATUS_LABEL[dayStatus(logs[k], goal)]}`}
+              aria-label={`${Number(k.slice(8))}일 ${STATUS_LABEL[dayStatus(logs[k], goal)]}${logs[k]?.weight != null ? ` · ${logs[k].weight}kg` : ""}`}
             >
               {Number(k.slice(8))}
+              {logs[k]?.weight != null && <span className="cal-w">{logs[k].weight}</span>}
               {/* 치팅데이도 그날 상한(유지 칼로리) 기준 달성 색을 별에 칠한다 (PL-D3) */}
               {logs[k]?.cheat ? (
                 <span className={`star ${dayStatus(logs[k], goal)}`}>★</span>
@@ -129,6 +131,9 @@ export default function CalendarPage() {
         <span>
           <span className="star">★</span> 치팅데이 (별 색은 유지 칼로리 기준)
         </span>
+        <span>
+          <span className="cal-w">72.4</span> 그날 잰 몸무게(kg)
+        </span>
       </div>
 
       <section className="panel">
@@ -137,6 +142,14 @@ export default function CalendarPage() {
           <span className={`status ${status}`}>{STATUS_LABEL[status]}</span>
           {day?.cheat && <span className="status cheat">★ 치팅데이</span>}
         </h2>
+        <WeightInput
+          key={selected}
+          id={selected}
+          value={day?.weight}
+          label={selected === dateKey(today) ? "오늘 몸무게" : "이 날 몸무게"}
+          showPlanLink={false}
+          onSave={(w) => updateDay(selected, (d) => ({ ...d, weight: w ?? undefined }))}
+        />
         {day?.entries.length ? (
           <>
             <p>

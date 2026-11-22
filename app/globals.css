@@ -1271,3 +1271,23 @@ button:disabled {
   align-items: center;
   gap: 8px;
 }
+
+/* 캘린더: 그날 잰 몸무게 */
+.cal-w {
+  font-size: 0.62rem;
+  line-height: 1;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-day.selected .cal-w {
+  color: var(--accent);
+}
+
+section.panel .weight-input {
+  margin: 8px 0 12px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
