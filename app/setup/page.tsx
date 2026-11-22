@@ -14,10 +14,11 @@ import {
 } from "@/lib/goal";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("ko-KR");
+import { dateKey } from "@/lib/store";
 import { accountsEnabled } from "@/lib/supabase";
 import { useAppData } from "../useAppData";
 
-type Form = Record<keyof Profile, string>;
+type Form = Record<Exclude<keyof Profile, "startDate">, string>;
 
 const DEFAULT_FORM: Form = {
   heightCm: "",
@@ -44,7 +45,11 @@ function toProfile(f: Form): Profile {
 }
 
 function toForm(p: Profile): Form {
-  return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, String(v)])) as Form;
+  return Object.fromEntries(
+    Object.entries(p)
+      .filter(([k]) => k !== "startDate")
+      .map(([k, v]) => [k, String(v)]),
+  ) as Form;
 }
 
 export default function SetupPage() {
@@ -72,7 +77,13 @@ export default function SetupPage() {
       setError(draftError);
       return;
     }
-    setProfile(draft);
+    // 체중 · 목표 체중 · 감량 속도가 그대로면 계획 시작일을 유지하고, 바뀌면 오늘부터 새 계획
+    const same =
+      profile &&
+      profile.weightKg === draft.weightKg &&
+      profile.targetWeightKg === draft.targetWeightKg &&
+      profile.weeklyLossKg === draft.weeklyLossKg;
+    setProfile({ ...draft, startDate: same && profile.startDate ? profile.startDate : dateKey(new Date()) });
     router.push("/plan");
   }
 

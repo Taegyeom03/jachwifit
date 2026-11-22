@@ -35,6 +35,7 @@ export type DayLog = {
   entries: Entry[];
   rec?: RecStat;
   cheat?: boolean; // 치팅데이
+  weight?: number; // 그날 잰 몸무게(kg)
   updatedAt?: number; // 마지막으로 고친 시각(ms). 두 기기 기록을 맞출 때 더 최근 것을 쓴다
 };
 

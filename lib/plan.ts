@@ -88,3 +88,59 @@ export function weightPath(profile: Profile, goal: Goal, start: Date = new Date(
 export function formatKoreanDate(d: Date): string {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
+
+// ── 계획 vs 실제 몸무게 ──
+// 계획 선: 시작일 체중에서 하루 (적자 ÷ 7,700)kg씩 목표 체중까지. 실제: 날짜별로 기록한 몸무게.
+export type WeighIn = { date: string; day: number; weightKg: number };
+
+export type Progress = {
+  start: Date;
+  perDay: number; // 계획상 하루 감량(kg)
+  planDays: number; // 목표 체중까지 계획 일수 (감량 계획이 없으면 0)
+  records: WeighIn[]; // 시작일 이후 기록, 날짜순
+  latest: WeighIn | null;
+  plannedAtLatest: number | null; // 마지막 기록 날의 계획 체중
+  diff: number | null; // 실제 − 계획 (음수면 계획보다 빠름)
+};
+
+const parseKey = (k: string) => {
+  const [y, m, d] = k.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+const daysBetween = (a: Date, b: Date) => Math.round((b.getTime() - a.getTime()) / 86_400_000);
+
+export function plannedWeight(profile: Profile, perDay: number, day: number): number {
+  return Math.max(profile.targetWeightKg, profile.weightKg - perDay * Math.max(0, day));
+}
+
+export function weightProgress(
+  profile: Profile,
+  goal: Goal,
+  logs: Record<string, { weight?: number }>,
+): Progress {
+  const weighed = Object.entries(logs)
+    .filter(([, d]) => typeof d.weight === "number")
+    .map(([k, d]) => ({ date: k, weightKg: d.weight as number }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  // 시작일: 목표를 저장한 날. 예전에 저장해 날짜가 없으면 첫 몸무게 기록 날(없으면 오늘)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = profile.startDate ? parseKey(profile.startDate) : weighed.length ? parseKey(weighed[0].date) : today;
+
+  const perDay = goal.weeks ? goal.dailyDeficit / KCAL_PER_KG : 0;
+  const planDays = goal.weeks && perDay > 0 ? Math.ceil((profile.weightKg - profile.targetWeightKg) / perDay) : 0;
+  const records = weighed
+    .map((r) => ({ ...r, day: daysBetween(start, parseKey(r.date)) }))
+    .filter((r) => r.day >= 0);
+  const latest = records.length ? records[records.length - 1] : null;
+  const plannedAtLatest = latest && planDays ? plannedWeight(profile, perDay, latest.day) : null;
+  return {
+    start,
+    perDay,
+    planDays,
+    records,
+    latest,
+    plannedAtLatest,
+    diff: latest && plannedAtLatest != null ? latest.weightKg - plannedAtLatest : null,
+  };
+}

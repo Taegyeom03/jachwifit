@@ -142,7 +142,7 @@ async function doSync(): Promise<SyncResult> {
     else toPush.push(day);
   }
   for (const day of Object.keys(logs)) {
-    if (!remoteDays.has(day) && logs[day].entries.length) toPush.push(day);
+    if (!remoteDays.has(day) && (logs[day].entries.length || logs[day].weight != null)) toPush.push(day);
   }
   for (const day of meta.dirtyDays ?? []) if (!toPush.includes(day) && logs[day]) toPush.push(day);
 

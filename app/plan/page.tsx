@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { isTemporary } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
-import { buildDayPlans, formatKoreanDate, weightPath, type WeightPoint } from "@/lib/plan";
+import { buildDayPlans, formatKoreanDate, plannedWeight, weightPath, weightProgress, type Progress } from "@/lib/plan";
+import type { Profile } from "@/lib/goal";
 import { FoodLine, SourceNote } from "../components/Recommendations";
 import { useAppData } from "../useAppData";
 
@@ -13,7 +14,7 @@ const kg = (n: number) => `${Math.round(n * 10) / 10}kg`;
 
 // 처음 시작 화면 2단계: 목표를 저장한 뒤 "이렇게 먹으면 언제쯤 목표 체중" 계획을 보여 준다
 export default function PlanPage() {
-  const { ready, profile } = useAppData();
+  const { ready, profile, logs } = useAppData();
   const [variant, setVariant] = useState(0);
 
   if (!ready) return <p className="muted">불러오는 중…</p>;
@@ -29,7 +30,8 @@ export default function PlanPage() {
   }
 
   const goal = calcGoal(profile);
-  const path = weightPath(profile, goal);
+  const progress = weightProgress(profile, goal, logs);
+  const path = weightPath(profile, goal, progress.start);
   const end = path[path.length - 1];
   const plans = buildDayPlans(goal);
   const plan = plans.length ? plans[variant % plans.length] : null;
@@ -64,13 +66,22 @@ export default function PlanPage() {
         ))}
       </section>
 
-      {path.length > 1 && (
+      {(progress.planDays > 0 || progress.records.length > 0) && (
         <section className="panel">
-          <h2>주차별 예상 체중</h2>
-          <WeightChart points={path} />
+          <h2>계획 vs 실제 몸무게</h2>
+          <ProgressSummary profile={profile} progress={progress} />
+          <ProgressChart profile={profile} progress={progress} />
+          <p className="chart-legend small">
+            <span>
+              <i className="lg-plan" /> 계획
+            </span>
+            <span>
+              <i className="lg-actual" /> 내가 잰 몸무게
+            </span>
+          </p>
           <p className="muted small">
-            하루 {fmt(goal.dailyDeficit)}kcal 적게 먹으면 7,700kcal당 1kg이 빠진다고 보고 계산했어요. 실제로는 몸이 적응해
-            중간에 정체기가 올 수 있어요.
+            계획 선은 {formatKoreanDate(progress.start)}부터 하루 {fmt(goal.dailyDeficit)}kcal 적게 먹으면 7,700kcal당 1kg이
+            빠진다고 보고 그렸어요. 몸무게는 물 · 음식에 따라 하루 1kg씩도 오르내리니, 한 번보다 흐름을 보세요.
           </p>
         </section>
       )}
@@ -135,40 +146,111 @@ function Stat({ label, value, strong }: { label: string; value: string; strong?:
   );
 }
 
-// 주차별 예상 체중 꺾은선 (SVG, 화면 폭에 맞춰 늘어남)
-function WeightChart({ points }: { points: WeightPoint[] }) {
+function ProgressSummary({ profile, progress }: { profile: Profile; progress: Progress }) {
+  const { latest, diff } = progress;
+  if (!latest) {
+    return (
+      <p className="progress-msg">
+        아직 잰 몸무게가 없어요. <Link href="/">오늘 화면</Link>에서 몸무게를 기록하면 계획과 비교해 드려요.
+      </p>
+    );
+  }
+  const lost = profile.weightKg - latest.weightKg;
+  const d = latest.date.slice(5).replace("-", "/");
+  return (
+    <p className="progress-msg">
+      {d} 기준 <b>{kg(latest.weightKg)}</b> · 시작보다 {lost >= 0 ? `${kg(lost)} 감량` : `${kg(-lost)} 증가`}
+      {diff != null && (
+        <>
+          <br />
+          {Math.abs(diff) < 0.3 ? (
+            <span className="pace good">계획대로 가고 있어요 👍</span>
+          ) : diff < 0 ? (
+            <span className="pace good">계획보다 {kg(-diff)} 빨라요 🎉</span>
+          ) : (
+            <span className="pace slow">계획보다 {kg(diff)} 늦어요. 이번 주 칼로리를 한 번 확인해 보세요.</span>
+          )}
+        </>
+      )}
+    </p>
+  );
+}
+
+// 계획 선(목표 체중까지) 위에 실제로 잰 몸무게를 점 · 선으로 겹쳐 그린다 (SVG, 화면 폭에 맞춰 늘어남)
+function ProgressChart({ profile, progress }: { profile: Profile; progress: Progress }) {
   // 휴대폰 폭(약 310px)에서도 글씨가 11px 이상 보이도록 작은 좌표계를 쓴다
   const W = 360;
-  const H = 170;
-  const pad = { l: 46, r: 18, t: 14, b: 26 };
-  const first = points[0];
-  const last = points[points.length - 1];
-  const hi = Math.ceil(first.weightKg + 0.5);
-  const lo = Math.floor(last.weightKg - 0.5);
-  const x = (w: number) => pad.l + (w / last.week) * (W - pad.l - pad.r);
+  const H = 180;
+  const pad = { l: 46, r: 18, t: 16, b: 26 };
+  const { planDays, perDay, records, latest } = progress;
+  const xMax = Math.max(planDays, latest?.day ?? 0, 7);
+  const values = [profile.weightKg, ...records.map((r) => r.weightKg)];
+  if (planDays) values.push(profile.targetWeightKg);
+  const hi = Math.ceil(Math.max(...values) + 0.5);
+  const lo = Math.floor(Math.min(...values) - 0.5);
+  const x = (day: number) => pad.l + (day / xMax) * (W - pad.l - pad.r);
   const y = (v: number) => pad.t + ((hi - v) / (hi - lo)) * (H - pad.t - pad.b);
-  const line = points.map((p) => `${x(p.week).toFixed(1)},${y(p.weightKg).toFixed(1)}`).join(" ");
-  // 4주마다 눈금 (너무 길면 8주)
-  const step = last.week > 24 ? 8 : 4;
-  const ticks = points.filter((p) => p.week % step === 0 && p.week !== last.week);
+
+  const planPts: [number, number][] = planDays
+    ? [[0, profile.weightKg], [planDays, profile.targetWeightKg], ...(xMax > planDays ? [[xMax, profile.targetWeightKg] as [number, number]] : [])]
+    : [];
+  const toLine = (pts: [number, number][]) => pts.map(([d, v]) => `${x(d).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+
+  // 주 단위 눈금: 기간이 길면 간격을 넓힌다
+  const weeks = xMax / 7;
+  const step = weeks <= 6 ? 1 : weeks <= 12 ? 2 : weeks <= 24 ? 4 : 8;
+  const ticks: number[] = [];
+  for (let w = 0; w * 7 <= xMax - step * 3.5; w += step) ticks.push(w);
+  const endLabel = `${Math.round(weeks)}주`;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="weight-chart" role="img" aria-label={`${first.weightKg}kg에서 ${last.weightKg}kg까지 ${last.week}주 예상`}>
-      <line x1={pad.l} x2={W - pad.r} y1={y(last.weightKg)} y2={y(last.weightKg)} className="chart-goal" />
-      <text x={pad.l - 6} y={y(first.weightKg) + 4} textAnchor="end" className="chart-label">
-        {kg(first.weightKg)}
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="weight-chart"
+      role="img"
+      aria-label={`계획: ${kg(profile.weightKg)}에서 ${kg(profile.targetWeightKg)}까지. 기록 ${records.length}개${latest ? `, 마지막 ${kg(latest.weightKg)}` : ""}`}
+    >
+      {planDays > 0 && (
+        <line x1={pad.l} x2={W - pad.r} y1={y(profile.targetWeightKg)} y2={y(profile.targetWeightKg)} className="chart-goal" />
+      )}
+      <text x={pad.l - 6} y={y(profile.weightKg) + 4} textAnchor="end" className="chart-label">
+        {kg(profile.weightKg)}
       </text>
-      <text x={pad.l - 6} y={y(last.weightKg) + 4} textAnchor="end" className="chart-label">
-        {kg(last.weightKg)}
-      </text>
-      {[...ticks, last].map((p) => (
-        <text key={p.week} x={x(p.week)} y={H - 8} textAnchor="middle" className="chart-label">
-          {p.week === 0 ? "오늘" : `${p.week}주`}
+      {planDays > 0 && (
+        <text x={pad.l - 6} y={y(profile.targetWeightKg) + 4} textAnchor="end" className="chart-label">
+          {kg(profile.targetWeightKg)}
+        </text>
+      )}
+      {ticks.map((w) => (
+        <text key={w} x={x(w * 7)} y={H - 8} textAnchor="middle" className="chart-label">
+          {w === 0 ? "시작" : `${w}주`}
         </text>
       ))}
-      <polyline points={line} className="chart-line" />
-      <circle cx={x(first.week)} cy={y(first.weightKg)} r={4} className="chart-dot" />
-      <circle cx={x(last.week)} cy={y(last.weightKg)} r={5} className="chart-dot goal" />
+      <text x={x(xMax)} y={H - 8} textAnchor="middle" className="chart-label">
+        {endLabel}
+      </text>
+
+      {planPts.length > 0 && <polyline points={toLine(planPts)} className="chart-line plan" />}
+      {planDays > 0 && <circle cx={x(planDays)} cy={y(profile.targetWeightKg)} r={5} className="chart-dot goal" />}
+
+      {records.length > 1 && <polyline points={toLine(records.map((r) => [r.day, r.weightKg]))} className="chart-actual" />}
+      {records.map((r) => (
+        <circle key={r.date} cx={x(r.day)} cy={y(r.weightKg)} r={r === latest ? 4.5 : 3} className="chart-actual-dot">
+          <title>
+            {r.date.slice(5).replace("-", "/")} {kg(r.weightKg)} (계획 {kg(plannedWeight(profile, perDay, r.day))})
+          </title>
+        </circle>
+      ))}
+      {latest && (
+        <text
+          x={Math.min(x(latest.day), W - pad.r - 20)}
+          y={y(latest.weightKg) - 9}
+          textAnchor="middle"
+          className="chart-label actual"
+        >
+          {kg(latest.weightKg)}
+        </text>
+      )}
     </svg>
   );
 }

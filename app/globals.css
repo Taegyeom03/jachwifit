@@ -1112,3 +1112,103 @@ button:disabled {
 .cal-day .star {
   font-size: 0.85rem;
 }
+
+/* 몸무게 기록 (오늘 화면) */
+.weight-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.weight-input label {
+  font-weight: 600;
+}
+
+.weight-input input {
+  width: 6.5em;
+  min-width: 0;
+}
+
+.weight-input .small {
+  margin-left: auto;
+}
+
+.weight-input .full {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* 계획 vs 실제 몸무게 */
+.progress-msg {
+  margin: 0 0 10px;
+  line-height: 1.6;
+}
+
+.progress-msg b {
+  color: var(--accent);
+}
+
+.pace.good {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pace.slow {
+  color: var(--over);
+  font-weight: 600;
+}
+
+.chart-line.plan {
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  opacity: 0.8;
+}
+
+.chart-dot.goal {
+  stroke: var(--muted);
+  fill: var(--muted);
+}
+
+.chart-actual {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.chart-actual-dot {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.chart-label.actual {
+  fill: var(--accent);
+  font-weight: 700;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin: 6px 0;
+  color: var(--muted);
+}
+
+.chart-legend i {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.lg-plan {
+  border-top: 2px dashed var(--muted);
+}
+
+.lg-actual {
+  border-top: 3px solid var(--accent);
+}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
@@ -97,6 +97,13 @@ export default function Today() {
           {Math.round(goal.targetProtein)}g)는 그대로예요.
         </p>
       )}
+
+      <WeightInput
+        key={key}
+        value={day?.weight}
+        label={isToday ? "오늘 몸무게" : "이 날 몸무게"}
+        onSave={(w) => updateDay(key, (d) => ({ ...d, weight: w ?? undefined }))}
+      />
 
       <section className="panel">
         {bars.map((b) => {
@@ -260,5 +267,61 @@ function RecipeSuggestions({ kcalLeft }: { kcalLeft: number }) {
         <Link href="/recipes">레시피 전체 보기 →</Link>
       </p>
     </section>
+  );
+}
+
+// 그날 몸무게 기록. 저장하면 내 계획 화면의 "계획 vs 실제" 그래프에 점으로 찍힌다.
+function WeightInput({
+  value,
+  label,
+  onSave,
+}: {
+  value?: number;
+  label: string;
+  onSave: (w: number | null) => void;
+}) {
+  const [text, setText] = useState(value != null ? String(value) : "");
+  const [error, setError] = useState("");
+  const num = Number(text);
+  const changed = text.trim() !== (value != null ? String(value) : "");
+
+  function save(e: FormEvent) {
+    e.preventDefault();
+    if (!text.trim()) {
+      onSave(null);
+      setError("");
+      return;
+    }
+    if (!(num >= 30 && num <= 250)) {
+      setError("몸무게는 30~250kg 사이로 입력해 주세요.");
+      return;
+    }
+    setError("");
+    const w = Math.round(num * 10) / 10;
+    setText(String(w));
+    onSave(w);
+  }
+
+  return (
+    <form className="panel weight-input" onSubmit={save} noValidate>
+      <label htmlFor="weight-today">⚖️ {label}</label>
+      <input
+        id="weight-today"
+        type="number"
+        inputMode="decimal"
+        step="any"
+        placeholder="예: 72.4"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <span>kg</span>
+      <button type="submit" className="button" disabled={!changed}>
+        {value != null && !changed ? "저장됨" : "저장"}
+      </button>
+      <Link href="/plan" className="small">
+        계획과 비교 →
+      </Link>
+      {error && <p className="error full">{error}</p>}
+    </form>
   );
 }

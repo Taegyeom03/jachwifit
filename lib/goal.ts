@@ -11,6 +11,7 @@ export type Profile = {
   activity: number; // ACTIVITY_LEVELS 인덱스
   proteinPerKg: number; // 1.2 ~ 1.6
   weeklyLossKg: number; // 주당 목표 감량
+  startDate?: string; // 계획을 시작한 날(YYYY-MM-DD). 체중 · 목표 · 감량 속도를 바꾸면 새로 시작한다
 };
 
 export const ACTIVITY_LEVELS = [
