@@ -103,7 +103,12 @@ export default function CalendarPage() {
               aria-label={`${Number(k.slice(8))}일 ${STATUS_LABEL[dayStatus(logs[k], goal)]}`}
             >
               {Number(k.slice(8))}
-              {logs[k]?.cheat ? <span className="star">★</span> : <span className={`dot ${dayStatus(logs[k], goal)}`} />}
+              {/* 치팅데이도 그날 상한(유지 칼로리) 기준 달성 색을 별에 칠한다 (PL-D3) */}
+              {logs[k]?.cheat ? (
+                <span className={`star ${dayStatus(logs[k], goal)}`}>★</span>
+              ) : (
+                <span className={`dot ${dayStatus(logs[k], goal)}`} />
+              )}
             </button>
           ) : (
             <span key={`blank-${i}`} />
@@ -122,7 +127,7 @@ export default function CalendarPage() {
           <span className="dot over" /> 10% 넘게 초과
         </span>
         <span>
-          <span className="star">★</span> 치팅데이
+          <span className="star">★</span> 치팅데이 (별 색은 유지 칼로리 기준)
         </span>
       </div>
 

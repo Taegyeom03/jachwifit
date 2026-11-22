@@ -1095,3 +1095,20 @@ button:disabled {
 .privacy ul {
   padding-left: 20px;
 }
+
+/* 치팅데이 별: 그날 상한(유지 칼로리) 기준 달성 색 */
+.star.good {
+  color: var(--good);
+}
+
+.star.near {
+  color: var(--near);
+}
+
+.star.over {
+  color: var(--over);
+}
+
+.cal-day .star {
+  font-size: 0.85rem;
+}
