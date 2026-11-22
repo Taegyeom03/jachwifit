@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ACTIVITY_LEVELS,
@@ -71,15 +72,67 @@ export default function SetupPage() {
       return;
     }
     setProfile(draft);
-    router.push("/");
+    router.push("/plan");
   }
 
   if (!ready) return <p className="muted">불러오는 중…</p>;
 
+  const first = !profile;
+
+  // 활동량 · 감량 속도 · 단백질은 기본값(추천)이 있어 처음에는 접어 둔다
+  const advanced = (
+    <>
+      <label>
+        활동량
+        <select value={form.activity} onChange={(e) => set("activity", e.target.value)}>
+          {ACTIVITY_LEVELS.map((a, i) => (
+            <option key={a.label} value={i}>
+              {a.label} ({a.detail})
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        감량 속도
+        <select value={form.weeklyLossKg} onChange={(e) => set("weeklyLossKg", e.target.value)}>
+          {WEEKLY_LOSS_OPTIONS.map((w) => (
+            <option key={w} value={w}>
+              주당 {w}kg{w === 0.5 ? " (추천)" : ""}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        단백질 (체중 1kg당 g)
+        <select value={form.proteinPerKg} onChange={(e) => set("proteinPerKg", e.target.value)}>
+          {["1.2", "1.3", "1.4", "1.5", "1.6"].map((v) => (
+            <option key={v} value={v}>
+              {v}g{v === "1.4" ? " (기본)" : ""}
+            </option>
+          ))}
+        </select>
+      </label>
+    </>
+  );
+
   return (
     <>
-      <h1>목표 설정</h1>
-      <p className="muted">신체 정보와 목표를 입력하면 하루 목표 칼로리와 단백질을 계산해 드려요.</p>
+      {first ? (
+        <>
+          <h1>자취핏 시작하기</h1>
+          <p className="muted">
+            키와 몸무게, 목표 체중만 넣으면 하루에 얼마나 먹으면 되는지, 몇 주면 목표에 닿는지 계산해 드려요.
+          </p>
+        </>
+      ) : (
+        <div className="plan-meals-head">
+          <h1>목표 설정</h1>
+          <Link href="/plan" className="button">
+            내 계획 보기
+          </Link>
+        </div>
+      )}
+      {!first && <p className="muted">신체 정보와 목표를 입력하면 하루 목표 칼로리와 단백질을 계산해 드려요.</p>}
 
       <form onSubmit={handleSubmit} className="panel form-grid">
         <label>
@@ -122,41 +175,19 @@ export default function SetupPage() {
             onChange={(e) => set("targetWeightKg", e.target.value)}
           />
         </label>
-        <label>
-          활동량
-          <select value={form.activity} onChange={(e) => set("activity", e.target.value)}>
-            {ACTIVITY_LEVELS.map((a, i) => (
-              <option key={a.label} value={i}>
-                {a.label} ({a.detail})
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          감량 속도
-          <select value={form.weeklyLossKg} onChange={(e) => set("weeklyLossKg", e.target.value)}>
-            {WEEKLY_LOSS_OPTIONS.map((w) => (
-              <option key={w} value={w}>
-                주당 {w}kg{w === 0.5 ? " (추천)" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          단백질 (체중 1kg당 g)
-          <select value={form.proteinPerKg} onChange={(e) => set("proteinPerKg", e.target.value)}>
-            {["1.2", "1.3", "1.4", "1.5", "1.6"].map((v) => (
-              <option key={v} value={v}>
-                {v}g{v === "1.4" ? " (기본)" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
+        {first ? (
+          <details>
+            <summary>더 자세히 설정 (활동량 · 감량 속도 · 단백질, 안 바꿔도 돼요)</summary>
+            <div className="form-grid">{advanced}</div>
+          </details>
+        ) : (
+          advanced
+        )}
 
         {error && <p className="error full">{error}</p>}
         {saveError && <p className="error full">이 브라우저에서는 저장할 수 없어요. 시크릿 모드인지 확인해 주세요.</p>}
         <button type="submit" className="primary full">
-          {profile ? "목표 저장" : "저장하고 시작하기"}
+          {first ? "내 계획 보기" : "목표 저장하고 계획 보기"}
         </button>
       </form>
 

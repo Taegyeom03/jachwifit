@@ -692,3 +692,103 @@ h3.sub {
     padding: 6px 8px;
   }
 }
+
+/* 내 계획 (처음 시작 화면) */
+.plan-headline {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.plan-headline b {
+  color: var(--accent);
+}
+
+.weight-chart {
+  display: block;
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.chart-goal {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.chart-dot {
+  fill: var(--surface);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.chart-dot.goal {
+  fill: var(--accent);
+}
+
+.chart-label {
+  fill: var(--muted);
+  font-size: 13px;
+}
+
+.plan-meals-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.plan-meals-head h2 {
+  margin: 0;
+}
+
+.plan-meals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.plan-meal {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.plan-meal h3 {
+  margin: 4px 0;
+}
+
+.plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.form-grid details {
+  grid-column: 1 / -1;
+}
+
+.form-grid details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.form-grid details[open] .form-grid {
+  margin-top: 12px;
+}
+
+.plan-hero .stats {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}

@@ -28,6 +28,9 @@ export function nutritionLabel(f: Food): string {
   const median = s.match(/^가공식품 (\d+)개 중앙값/);
   if (median) return `영양 식약처 가공식품 ${median[1]}개 중앙값`;
   if (s.startsWith("음식")) return "영양 식약처 음식 DB";
+  const api = s.match(/^식품영양성분DB API (\d+)개 중앙값/);
+  if (api) return `영양 식약처 영양성분DB ${api[1]}개 중앙값`;
+  if (s.startsWith("식품영양성분DB API")) return "영양 식약처 영양성분DB";
   return `영양 ${s}`;
 }
 

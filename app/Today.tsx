@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
@@ -32,6 +32,12 @@ export default function Today() {
   const params = useSearchParams();
   const { ready, profile, logs, updateDay, saveError } = useAppData();
   const [showSnack, setShowSnack] = useState(false);
+  const router = useRouter();
+
+  // 처음 들어온 사람(목표 없음)은 바로 목표 설정으로 보낸다
+  useEffect(() => {
+    if (ready && !profile) router.replace("/setup");
+  }, [ready, profile, router]);
 
   const todayKey = dateKey(new Date());
   const requested = params.get("date");
