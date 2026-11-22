@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   return (
     <article className="panel privacy">
       <h1>개인정보 처리방침</h1>
-      <p className="muted small">시행일: 2026년 11월 22일</p>
+      <p className="muted small">시행일: 2026년 11월 23일</p>
 
       <p>
         자취핏(이하 &quot;서비스&quot;)은 개인이 운영하는 다이어트 · 식단 기록 웹 서비스예요. 회원가입을 하지 않으면 모든
@@ -19,7 +19,8 @@ export default function PrivacyPage() {
       <ul>
         <li>계정 정보: 이메일 주소, 비밀번호(암호화되어 저장되며 운영자도 볼 수 없어요)</li>
         <li>신체 · 목표 정보: 성별, 나이, 키, 현재 체중, 목표 체중, 활동량, 감량 속도, 단백질 목표</li>
-        <li>이용 기록: 날짜별로 먹은 음식 · 양 · 끼니, 치팅데이 여부, 직접 입력한 음식 가격</li>
+        <li>이용 기록: 날짜별로 먹은 음식 · 양 · 끼니, 몸무게, 치팅데이 여부, 직접 입력한 음식 가격</li>
+        <li>AI 기록 횟수: 날짜별로 [문장으로 기록]을 쓴 횟수 (하루 사용 한도 확인용)</li>
       </ul>
       <p className="muted small">
         체중 등 신체 정보는 건강과 관련된 민감한 정보일 수 있어요. 서비스는 목표 칼로리 계산과 기록 표시에만 쓰고, 다른
@@ -46,6 +47,10 @@ export default function PrivacyPage() {
       <ul>
         <li>Supabase Inc.: 로그인 · 데이터베이스 (계정 정보와 기록 저장)</li>
         <li>Netlify Inc.: 웹사이트 호스팅 (접속 시 IP 등 기술적인 접속 기록이 남을 수 있어요)</li>
+        <li>
+          OpenRouter Inc.와 그곳에서 연결하는 AI 모델 제공사: [문장으로 기록]을 누를 때 <b>입력한 문장만</b> 보내 음식을
+          찾아요. 이메일 · 체중 · 다른 기록은 보내지 않고, 자취핏은 그 문장을 저장하지 않아요.
+        </li>
       </ul>
       <p className="muted small">위 회사의 서버는 국외에 있을 수 있어요.</p>
 
