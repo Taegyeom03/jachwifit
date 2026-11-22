@@ -1054,3 +1054,44 @@ a.recipe-link:hover {
     font-size: 0.85rem;
   }
 }
+
+/* 계정 */
+.account-link {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.account-link a,
+.footer a {
+  color: var(--accent);
+}
+
+.auth-form {
+  max-width: 420px;
+}
+
+.auth-form .check {
+  align-items: flex-start;
+}
+
+.danger-button {
+  margin-top: 8px;
+  border-color: var(--error);
+  color: var(--error);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.privacy h2 {
+  margin-top: 20px;
+  font-size: 1.05rem;
+}
+
+.privacy ul {
+  padding-left: 20px;
+}

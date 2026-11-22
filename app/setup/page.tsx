@@ -14,6 +14,7 @@ import {
 } from "@/lib/goal";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("ko-KR");
+import { accountsEnabled } from "@/lib/supabase";
 import { useAppData } from "../useAppData";
 
 type Form = Record<keyof Profile, string>;
@@ -48,7 +49,7 @@ function toForm(p: Profile): Form {
 
 export default function SetupPage() {
   const router = useRouter();
-  const { ready, profile, setProfile, saveError } = useAppData();
+  const { ready, profile, setProfile, saveError, account } = useAppData();
   const [form, setForm] = useState<Form>(DEFAULT_FORM);
   const [error, setError] = useState("");
 
@@ -123,6 +124,11 @@ export default function SetupPage() {
           <p className="muted">
             키와 몸무게, 목표 체중만 넣으면 하루에 얼마나 먹으면 되는지, 몇 주면 목표에 닿는지 계산해 드려요.
           </p>
+          {accountsEnabled && !account && (
+            <p className="panel ok">
+              다른 기기에서 쓰던 계정이 있나요? <Link href="/login">로그인</Link>하면 목표와 기록을 그대로 불러와요.
+            </p>
+          )}
         </>
       ) : (
         <div className="plan-meals-head">

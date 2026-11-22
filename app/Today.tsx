@@ -23,21 +23,21 @@ function formatDate(key: string) {
 // 기능 1. 목표 대비 식사 기록 + 기능 2. 추천 카드
 export default function Today() {
   const params = useSearchParams();
-  const { ready, profile, logs, updateDay, setMyPrice, saveError } = useAppData();
+  const { ready, settled, profile, logs, updateDay, setMyPrice, saveError } = useAppData();
   const [showSnack, setShowSnack] = useState(false);
   const router = useRouter();
 
-  // 처음 들어온 사람(목표 없음)은 바로 목표 설정으로 보낸다
+  // 처음 들어온 사람(목표 없음)은 바로 목표 설정으로 보낸다. 계정에서 받아 오는 중이면 기다린다.
   useEffect(() => {
-    if (ready && !profile) router.replace("/setup");
-  }, [ready, profile, router]);
+    if (ready && settled && !profile) router.replace("/setup");
+  }, [ready, settled, profile, router]);
 
   const todayKey = dateKey(new Date());
   const requested = params.get("date");
   const key = requested && /^\d{4}-\d{2}-\d{2}$/.test(requested) ? requested : todayKey;
   const isToday = key === todayKey;
 
-  if (!ready) return <p className="muted">불러오는 중…</p>;
+  if (!ready || (!settled && !profile)) return <p className="muted">불러오는 중…</p>;
 
   if (!profile) {
     return (
