@@ -191,7 +191,7 @@ CLAUDE.md                 작업 규칙 (Git · 키 · 데이터 · 문서)
 
 ### 7.3 내 컴퓨터에서 실행하기
 
-[Node.js](https://nodejs.org) 18.18 이상이 필요해요. 키나 환경변수가 없어도 앱은 실행돼요(그때는 계정 기능이 꺼지고 이 기기에만 저장). 계정 기능까지 쓰려면 `.env.example`을 복사해 `.env.local`을 만들고 Supabase 값을 넣어요(7.6).
+[Node.js](https://nodejs.org) 22 이상(최소 20.19)이 필요해요. 키나 환경변수가 없어도 앱은 실행돼요(그때는 계정 기능이 꺼지고 이 기기에만 저장). 계정 기능까지 쓰려면 `.env.example`을 복사해 `.env.local`을 만들고 Supabase 값을 넣어요(7.6).
 
 ```bash
 npm install
