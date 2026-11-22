@@ -7,11 +7,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "자취핏",
   description: "자취생이 최소 비용으로 건강하게 다이어트하도록 돕는 식단 도우미",
+  applicationName: "자취핏",
+  appleWebApp: { capable: true, title: "자취핏", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#2f9e44",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
