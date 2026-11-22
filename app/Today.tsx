@@ -8,6 +8,7 @@ import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
 import { recipesWithin } from "@/lib/recipes";
 import { MEALS, dateKey, mealByHour, newId } from "@/lib/store";
+import AiMealInput from "./components/AiMealInput";
 import FoodAdder from "./components/FoodAdder";
 import NightSnack from "./components/NightSnack";
 import Recommendations from "./components/Recommendations";
@@ -23,7 +24,7 @@ function formatDate(key: string) {
 // 기능 1. 목표 대비 식사 기록 + 기능 2. 추천 카드
 export default function Today() {
   const params = useSearchParams();
-  const { ready, settled, profile, logs, updateDay, setMyPrice, saveError } = useAppData();
+  const { ready, settled, profile, logs, updateDay, setMyPrice, saveError, account } = useAppData();
   const [showSnack, setShowSnack] = useState(false);
   const router = useRouter();
 
@@ -167,6 +168,20 @@ export default function Today() {
           </p>
         </section>
       )}
+
+      <AiMealInput
+        loggedIn={!!account}
+        defaultMeal={isToday ? mealByHour(new Date().getHours()) : "점심"}
+        onAdd={(items) =>
+          updateDay(key, (d) => ({
+            ...d,
+            entries: [
+              ...d.entries,
+              ...items.map((it) => ({ id: newId(), foodId: it.foodId, amount: it.amount, unit: it.unit, meal: it.meal })),
+            ],
+          }))
+        }
+      />
 
       <FoodAdder
         defaultMeal={isToday ? mealByHour(new Date().getHours()) : "점심"}

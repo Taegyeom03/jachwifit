@@ -1218,3 +1218,56 @@ button:disabled {
   stroke-width: 1;
   opacity: 0.6;
 }
+
+/* 문장으로 기록 (AI) */
+.ai-input h3 {
+  margin: 0 0 8px;
+}
+
+.ai-form {
+  display: flex;
+  gap: 8px;
+}
+
+.ai-form input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ai-form .button {
+  flex-shrink: 0;
+}
+
+.ai-input .saved {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.ai-preview {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+
+.ai-preview ul {
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-preview li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
