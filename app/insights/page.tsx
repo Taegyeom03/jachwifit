@@ -1,60 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { isMyPrice, isPublicPrice, isTemporary, priceLabel } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit } from "@/lib/nutrition";
-import { proteinDensityRanking, proteinValueRanking } from "@/lib/recommend";
+import { proteinDensityRanking } from "@/lib/recommend";
 import { MEALS, dateKey } from "@/lib/store";
 import { useAppData } from "../useAppData";
 
 const won = (n: number) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 
-// 데이터 인사이트: 음식 데이터의 단백질 가성비 + 내 최근 7일 섭취 패턴
+// 데이터 인사이트: 칼로리 대비 단백질이 많은 음식 + 내 최근 7일 섭취 패턴
 export default function InsightsPage() {
   const { ready, profile, logs } = useAppData();
-  const [publicOnly, setPublicOnly] = useState(false);
-
-  const value = proteinValueRanking()
-    .filter((r) => !publicOnly || isPublicPrice(r.food))
-    .slice(0, 10);
   const density = proteinDensityRanking().slice(0, 10);
-  const bestValue = value[0]?.wonPerGram ?? 1;
   const bestDensity = density[0]?.gramPer100kcal ?? 1;
 
   return (
     <>
       <h1>인사이트</h1>
       <p className="muted">공공데이터로 만든 음식 데이터와 내 기록에서 찾은 것들이에요.</p>
-
-      <section className="panel">
-        <h2>단백질 가성비 TOP 10</h2>
-        <p className="muted small">단백질 1g을 먹는 데 드는 돈이 적은 순서예요. (1회 제공량 단백질 5g 이상)</p>
-        <label className="check">
-          <input type="checkbox" checked={publicOnly} onChange={(e) => setPublicOnly(e.target.checked)} />
-          공공데이터 가격만 보기
-        </label>
-        <p className="muted small">
-          임시값 가격은 <Link href="/prices">내 가격</Link>에서 내가 산 가격으로 바꿀 수 있어요.
-        </p>
-        <ol className="rank">
-          {value.map(({ food, wonPerGram }) => (
-            <li key={food.id}>
-              <div className="rank-head">
-                <span>{food.name}</span>
-                <b>1g당 {Math.round(wonPerGram)}원</b>
-              </div>
-              <div className="bar">
-                <div className="bar-fill" style={{ width: `${(bestValue / wonPerGram) * 100}%` }} />
-              </div>
-              <span className={`source${isTemporary(food.priceSource) ? " temp" : isMyPrice(food.priceSource) ? " mine" : ""}`}>
-                {food.servingLabel} · 단백질 {food.protein}g · {won(food.price)} · {priceLabel(food)}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
 
       <section className="panel">
         <h2>칼로리 대비 단백질 TOP 10</h2>

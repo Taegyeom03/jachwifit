@@ -115,13 +115,6 @@ function buildCombo(
   return { items: kept, kcal, protein, price, coverage: Math.min(1, protein / proteinGap) };
 }
 
-// 단백질 1g당 가격이 싼 순 (데이터 인사이트)
-export function proteinValueRanking(minProtein = 5): { food: Food; wonPerGram: number }[] {
-  return FOODS.filter((f) => f.protein >= minProtein && f.price > 0)
-    .map((food) => ({ food, wonPerGram: food.price / food.protein }))
-    .sort((a, b) => a.wonPerGram - b.wonPerGram);
-}
-
 // 100kcal당 단백질이 많은 순 (데이터 인사이트)
 export function proteinDensityRanking(minProtein = 3): { food: Food; gramPer100kcal: number }[] {
   return FOODS.filter((f) => f.protein >= minProtein && f.kcal > 0)
