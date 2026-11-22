@@ -1212,3 +1212,9 @@ button:disabled {
 .lg-actual {
   border-top: 3px solid var(--accent);
 }
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  opacity: 0.6;
+}

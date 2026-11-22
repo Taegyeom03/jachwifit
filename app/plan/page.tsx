@@ -16,6 +16,7 @@ const kg = (n: number) => `${Math.round(n * 10) / 10}kg`;
 export default function PlanPage() {
   const { ready, profile, logs } = useAppData();
   const [variant, setVariant] = useState(0);
+  const [view, setView] = useState<"recent" | "all" | null>(null);
 
   if (!ready) return <p className="muted">불러오는 중…</p>;
   if (!profile) {
@@ -33,6 +34,9 @@ export default function PlanPage() {
   const progress = weightProgress(profile, goal, logs);
   const path = weightPath(profile, goal, progress.start);
   const end = path[path.length - 1];
+  // 기록이 계획 기간의 일부만 차지하면 "최근 기록" 확대 보기를 기본으로
+  const canZoom = progress.planDays > 0 && !!progress.latest && progress.latest.day < progress.planDays * 0.6;
+  const chartView = canZoom ? (view ?? "recent") : "all";
   const plans = buildDayPlans(goal);
   const plan = plans.length ? plans[variant % plans.length] : null;
   const hasTemp = plan?.meals.some((m) => m.items.some((it) => isTemporary(it.food.priceSource)));
@@ -68,9 +72,32 @@ export default function PlanPage() {
 
       {(progress.planDays > 0 || progress.records.length > 0) && (
         <section className="panel">
-          <h2>계획 vs 실제 몸무게</h2>
+          <div className="plan-meals-head">
+            <h2>계획 vs 실제 몸무게</h2>
+            {canZoom && (
+              <div className="tabs" role="tablist" aria-label="그래프 범위">
+                {(
+                  [
+                    ["recent", "최근 기록"],
+                    ["all", "전체 계획"],
+                  ] as const
+                ).map(([k, label]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="tab"
+                    aria-selected={chartView === k}
+                    className={chartView === k ? "active" : ""}
+                    onClick={() => setView(k)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <ProgressSummary profile={profile} progress={progress} />
-          <ProgressChart profile={profile} progress={progress} />
+          <ProgressChart profile={profile} progress={progress} zoom={chartView === "recent"} />
           <p className="chart-legend small">
             <span>
               <i className="lg-plan" /> 계획
@@ -177,31 +204,53 @@ function ProgressSummary({ profile, progress }: { profile: Profile; progress: Pr
 }
 
 // 계획 선(목표 체중까지) 위에 실제로 잰 몸무게를 점 · 선으로 겹쳐 그린다 (SVG, 화면 폭에 맞춰 늘어남)
-function ProgressChart({ profile, progress }: { profile: Profile; progress: Progress }) {
+// zoom: 시작일 ~ 마지막 기록 며칠 뒤까지만 확대해서, 기록이 적을 때도 오르내림이 보이게 한다
+function ProgressChart({ profile, progress, zoom }: { profile: Profile; progress: Progress; zoom: boolean }) {
   // 휴대폰 폭(약 310px)에서도 글씨가 11px 이상 보이도록 작은 좌표계를 쓴다
   const W = 360;
   const H = 180;
-  const pad = { l: 46, r: 18, t: 16, b: 26 };
-  const { planDays, perDay, records, latest } = progress;
-  const xMax = Math.max(planDays, latest?.day ?? 0, 7);
-  const values = [profile.weightKg, ...records.map((r) => r.weightKg)];
-  if (planDays) values.push(profile.targetWeightKg);
-  const hi = Math.ceil(Math.max(...values) + 0.5);
-  const lo = Math.floor(Math.min(...values) - 0.5);
-  const x = (day: number) => pad.l + (day / xMax) * (W - pad.l - pad.r);
-  const y = (v: number) => pad.t + ((hi - v) / (hi - lo)) * (H - pad.t - pad.b);
+  const pad = { l: 50, r: 22, t: 18, b: 26 };
+  const { planDays, perDay, records, latest, start } = progress;
+  const plan = (d: number) => plannedWeight(profile, perDay, d);
 
+  const xMin = 0;
+  const xMax = zoom && latest ? Math.max(latest.day + 3, 7) : Math.max(planDays, latest?.day ?? 0, 7);
+  // 계획 선: 범위 양 끝 + (범위 안이면) 목표 도달 지점
   const planPts: [number, number][] = planDays
-    ? [[0, profile.weightKg], [planDays, profile.targetWeightKg], ...(xMax > planDays ? [[xMax, profile.targetWeightKg] as [number, number]] : [])]
+    ? [[xMin, plan(xMin)], ...(planDays < xMax ? [[planDays, profile.targetWeightKg] as [number, number]] : []), [xMax, plan(xMax)]]
     : [];
+  const values = [...records.map((r) => r.weightKg), ...planPts.map(([, v]) => v), profile.weightKg];
+  const step = zoom ? 0.5 : 1; // 세로 눈금 간격(kg)
+  const hi = Math.ceil((Math.max(...values) + step / 2) / step) * step;
+  const lo = Math.floor((Math.min(...values) - step / 2) / step) * step;
+  const x = (day: number) => pad.l + ((day - xMin) / (xMax - xMin)) * (W - pad.l - pad.r);
+  const y = (v: number) => pad.t + ((hi - v) / (hi - lo)) * (H - pad.t - pad.b);
   const toLine = (pts: [number, number][]) => pts.map(([d, v]) => `${x(d).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
 
-  // 주 단위 눈금: 기간이 길면 간격을 넓힌다
-  const weeks = xMax / 7;
-  const step = weeks <= 6 ? 1 : weeks <= 12 ? 2 : weeks <= 24 ? 4 : 8;
-  const ticks: number[] = [];
-  for (let w = 0; w * 7 <= xMax - step * 3.5; w += step) ticks.push(w);
-  const endLabel = `${Math.round(weeks)}주`;
+  // 세로 눈금: 확대면 0.5~1kg 간격 여러 줄, 전체면 시작 · 목표 체중만
+  const yTicks: number[] = [];
+  if (zoom) {
+    const every = hi - lo > 4 ? 1 : 0.5;
+    for (let v = lo; v <= hi + 1e-9; v += every) yTicks.push(Math.round(v * 10) / 10);
+  } else {
+    yTicks.push(profile.weightKg);
+    if (planDays) yTicks.push(profile.targetWeightKg);
+  }
+
+  // 가로 눈금: 확대면 날짜(MM/DD, 1주 간격), 전체면 주차
+  const xTicks: { day: number; label: string }[] = [];
+  if (zoom) {
+    for (let d = 0; d <= xMax - 2; d += 7) {
+      const date = new Date(start);
+      date.setDate(date.getDate() + d);
+      xTicks.push({ day: d, label: `${date.getMonth() + 1}/${date.getDate()}` });
+    }
+  } else {
+    const weeks = xMax / 7;
+    const every = weeks <= 6 ? 1 : weeks <= 12 ? 2 : weeks <= 24 ? 4 : 8;
+    for (let w = 0; w * 7 <= xMax - every * 3.5; w += every) xTicks.push({ day: w * 7, label: w === 0 ? "시작" : `${w}주` });
+    xTicks.push({ day: xMax, label: `${Math.round(weeks)}주` });
+  }
 
   return (
     <svg
@@ -210,41 +259,39 @@ function ProgressChart({ profile, progress }: { profile: Profile; progress: Prog
       role="img"
       aria-label={`계획: ${kg(profile.weightKg)}에서 ${kg(profile.targetWeightKg)}까지. 기록 ${records.length}개${latest ? `, 마지막 ${kg(latest.weightKg)}` : ""}`}
     >
-      {planDays > 0 && (
+      {zoom &&
+        yTicks.map((v) => <line key={`g${v}`} x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} className="chart-grid" />)}
+      {planDays > 0 && profile.targetWeightKg >= lo && (
         <line x1={pad.l} x2={W - pad.r} y1={y(profile.targetWeightKg)} y2={y(profile.targetWeightKg)} className="chart-goal" />
       )}
-      <text x={pad.l - 6} y={y(profile.weightKg) + 4} textAnchor="end" className="chart-label">
-        {kg(profile.weightKg)}
-      </text>
-      {planDays > 0 && (
-        <text x={pad.l - 6} y={y(profile.targetWeightKg) + 4} textAnchor="end" className="chart-label">
-          {kg(profile.targetWeightKg)}
-        </text>
-      )}
-      {ticks.map((w) => (
-        <text key={w} x={x(w * 7)} y={H - 8} textAnchor="middle" className="chart-label">
-          {w === 0 ? "시작" : `${w}주`}
+      {yTicks.map((v) => (
+        <text key={v} x={pad.l - 6} y={y(v) + 4} textAnchor="end" className="chart-label">
+          {kg(v)}
         </text>
       ))}
-      <text x={x(xMax)} y={H - 8} textAnchor="middle" className="chart-label">
-        {endLabel}
-      </text>
+      {xTicks.map((t) => (
+        <text key={t.day} x={x(t.day)} y={H - 8} textAnchor="middle" className="chart-label">
+          {t.label}
+        </text>
+      ))}
 
       {planPts.length > 0 && <polyline points={toLine(planPts)} className="chart-line plan" />}
-      {planDays > 0 && <circle cx={x(planDays)} cy={y(profile.targetWeightKg)} r={5} className="chart-dot goal" />}
+      {planDays > 0 && planDays <= xMax && (
+        <circle cx={x(planDays)} cy={y(profile.targetWeightKg)} r={5} className="chart-dot goal" />
+      )}
 
       {records.length > 1 && <polyline points={toLine(records.map((r) => [r.day, r.weightKg]))} className="chart-actual" />}
       {records.map((r) => (
-        <circle key={r.date} cx={x(r.day)} cy={y(r.weightKg)} r={r === latest ? 4.5 : 3} className="chart-actual-dot">
+        <circle key={r.date} cx={x(r.day)} cy={y(r.weightKg)} r={r === latest ? 4.5 : zoom ? 3.5 : 3} className="chart-actual-dot">
           <title>
-            {r.date.slice(5).replace("-", "/")} {kg(r.weightKg)} (계획 {kg(plannedWeight(profile, perDay, r.day))})
+            {r.date.slice(5).replace("-", "/")} {kg(r.weightKg)} (계획 {kg(plan(r.day))})
           </title>
         </circle>
       ))}
       {latest && (
         <text
-          x={Math.min(x(latest.day), W - pad.r - 20)}
-          y={y(latest.weightKg) - 9}
+          x={Math.min(x(latest.day), W - pad.r - 16)}
+          y={y(latest.weightKg) + (zoom ? 18 : -9)}
           textAnchor="middle"
           className="chart-label actual"
         >
