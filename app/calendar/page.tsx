@@ -56,13 +56,13 @@ export default function CalendarPage() {
   return (
     <>
       <div className="cal-head">
-        <button type="button" onClick={() => setMonth(new Date(year, m - 1, 1))} aria-label="이전 달">
+        <button type="button" onClick={() => setMonth(new Date(year, m - 1, 1))} aria-label="이전 달" disabled={year <= 2020 && m === 0}>
           ◀ 이전 달
         </button>
         <h1>
           {year}년 {m + 1}월
         </h1>
-        <button type="button" onClick={() => setMonth(new Date(year, m + 1, 1))} aria-label="다음 달">
+        <button type="button" onClick={() => setMonth(new Date(year, m + 1, 1))} aria-label="다음 달" disabled={year >= 2100 && m === 11}>
           다음 달 ▶
         </button>
       </div>
@@ -143,7 +143,7 @@ export default function CalendarPage() {
           {day?.cheat && <span className="status cheat">★ 치팅데이</span>}
         </h2>
         <WeightInput
-          key={selected}
+          key={`${selected}-${day?.weight ?? ""}`}
           id={selected}
           value={day?.weight}
           label={selected === dateKey(today) ? "오늘 몸무게" : "이 날 몸무게"}

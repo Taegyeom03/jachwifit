@@ -40,6 +40,9 @@ function markDirtyDay(key: string, dirty: boolean) {
   saveMeta({ ...meta, dirtyDays: [...set] });
 }
 
+// 다시 보내도 절대 성공하지 않는 오류 (DB 검사 제약 위반 · 잘못된 날짜). 이런 날은 다시 올리려고 붙잡지 않는다.
+const PERMANENT_CODES = new Set(["23514", "22007", "22008"]);
+
 // 하루 기록 하나를 계정에 올린다
 export async function pushDay(key: string, day: DayLog): Promise<boolean> {
   const sb = getSupabase();
@@ -48,7 +51,8 @@ export async function pushDay(key: string, day: DayLog): Promise<boolean> {
   const { error } = await sb
     .from("day_logs")
     .upsert({ user_id: user.id, day: key, log: day, updated_at: toIso(day.updatedAt) });
-  markDirtyDay(key, Boolean(error));
+  if (error && PERMANENT_CODES.has(error.code)) console.error(`[sync] ${key} 기록은 계정에 올릴 수 없어요 (${error.code})`);
+  markDirtyDay(key, Boolean(error) && !PERMANENT_CODES.has(error?.code ?? ""));
   return !error;
 }
 
@@ -142,7 +146,8 @@ async function doSync(): Promise<SyncResult> {
     else toPush.push(day);
   }
   for (const day of Object.keys(logs)) {
-    if (!remoteDays.has(day) && (logs[day].entries.length || logs[day].weight != null)) toPush.push(day);
+    const d = logs[day];
+    if (!remoteDays.has(day) && (d.entries.length || d.weight != null || d.cheat)) toPush.push(day);
   }
   for (const day of meta.dirtyDays ?? []) if (!toPush.includes(day) && logs[day]) toPush.push(day);
 
@@ -163,8 +168,14 @@ async function doSync(): Promise<SyncResult> {
       updated_at: toIso(logs[day].updatedAt),
     }));
     const { error } = await sb.from("day_logs").upsert(rows);
-    saveMeta({ ...loadMeta(), dirtyDays: error ? toPush : [] });
-    if (!error) uploadedDays = toPush.length;
+    if (!error) {
+      saveMeta({ ...loadMeta(), dirtyDays: [] });
+      uploadedDays = toPush.length;
+    } else {
+      // 한 날짜 때문에 전체가 막히지 않게 하루씩 다시 올린다 (pushDay가 실패한 날만 dirty로 남긴다)
+      saveMeta({ ...loadMeta(), dirtyDays: toPush });
+      for (const day of toPush) if (await pushDay(day, logs[day])) uploadedDays++;
+    }
   } else {
     saveMeta({ ...loadMeta(), dirtyDays: [] });
   }

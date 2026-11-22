@@ -106,6 +106,14 @@ export function dateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+// "2026-02-30"처럼 형식만 맞는 날짜나, DB가 받지 않는 범위(2020~2100년)는 거른다
+export function isValidDayKey(key: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) return false;
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return y >= 2020 && y <= 2100 && date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+}
+
 export function newId(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }

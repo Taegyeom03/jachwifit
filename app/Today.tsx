@@ -8,7 +8,7 @@ import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
 import { recipesWithin } from "@/lib/recipes";
 import { copyEntries, frequentFoods, previousLoggedDay } from "@/lib/quickLog";
-import { MEALS, dateKey, mealByHour, newId } from "@/lib/store";
+import { MEALS, dateKey, isValidDayKey, mealByHour, newId } from "@/lib/store";
 import AiMealInput from "./components/AiMealInput";
 import WeightInput from "./components/WeightInput";
 import FoodAdder from "./components/FoodAdder";
@@ -37,7 +37,7 @@ export default function Today() {
 
   const todayKey = dateKey(new Date());
   const requested = params.get("date");
-  const key = requested && /^\d{4}-\d{2}-\d{2}$/.test(requested) ? requested : todayKey;
+  const key = requested && isValidDayKey(requested) ? requested : todayKey;
   const isToday = key === todayKey;
 
   if (!ready || (!settled && !profile)) return <p className="muted">불러오는 중…</p>;
@@ -104,7 +104,7 @@ export default function Today() {
       )}
 
       <WeightInput
-        key={key}
+        key={`${key}-${day?.weight ?? ""}`}
         value={day?.weight}
         label={isToday ? "오늘 몸무게" : "이 날 몸무게"}
         onSave={(w) => updateDay(key, (d) => ({ ...d, weight: w ?? undefined }))}
@@ -188,6 +188,7 @@ export default function Today() {
       />
 
       <FoodAdder
+        key={key}
         defaultMeal={isToday ? mealByHour(new Date().getHours()) : "점심"}
         onAdd={(foodId, amount, unit, meal) =>
           updateDay(key, (d) => ({ ...d, entries: [...d.entries, { id: newId(), foodId, amount, unit, meal }] }))
@@ -261,8 +262,9 @@ export default function Today() {
         allowCheat={cheat}
         onStat={(stat) => {
           // 기록이 있는 날만, 결과가 바뀌었을 때만 저장 (Q6 성공 지표 측정)
-          if (!day?.entries.length || JSON.stringify(day.rec) === JSON.stringify(stat)) return;
-          updateDay(key, (d) => ({ ...d, rec: stat }));
+          // 계정과 맞추기 전에는 저장하지 않고, 고친 시각도 올리지 않는다 (옛 기록이 계정 기록을 덮지 않게)
+          if (!settled || !day?.entries.length || JSON.stringify(day.rec) === JSON.stringify(stat)) return;
+          updateDay(key, (d) => ({ ...d, rec: stat }), { silent: true });
         }}
       />
 

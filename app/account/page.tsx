@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { dateKey, loadLogs, loadMeta, loadMyPrices, loadProfile } from "@/lib/store";
 import { accountsEnabled } from "@/lib/supabase";
-import { deleteAccount, signOut } from "@/lib/sync";
+import { deleteAccount, signOut, syncNow } from "@/lib/sync";
 import { useAppData, type SyncState } from "../useAppData";
 
 const SYNC_LABEL: Record<SyncState, string> = {
@@ -63,6 +63,14 @@ export default function AccountPage() {
 
   async function logout() {
     setBusy(true);
+    // 로그아웃하면 이 기기 데이터를 지우므로, 아직 못 올린 변경을 먼저 올린다
+    await syncNow();
+    const m = loadMeta();
+    const left = (m.dirtyDays?.length ?? 0) + (m.dirtyState ? 1 : 0);
+    if (left && !window.confirm(`아직 계정에 올리지 못한 변경이 ${left}건 있어요. 로그아웃하면 이 기기에서 사라져요. 그래도 로그아웃할까요?`)) {
+      setBusy(false);
+      return;
+    }
     await signOut();
     router.replace("/login");
   }
