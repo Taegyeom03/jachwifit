@@ -201,6 +201,12 @@ const report = [];
 for (const row of old) {
   const rule = RULES.find((r) => r.name === row.name || r.rename === row.name);
   if (!rule) throw new Error(`${row.name}: 규칙이 없음`);
+  // fetch-nutrition-api.mjs로 채운 값은 그대로 둔다
+  if (rule.keepTemp && row.nutrition_source.startsWith("식품영양성분DB API")) {
+    out.push(row);
+    report.push(`${row.name.padEnd(14)} (API 값 유지)`);
+    continue;
+  }
   const found = rule.keepTemp ? null : resolve(rule);
   if (!found) {
     const reason = rule.keepTemp ?? "임시값(공공데이터에서 못 찾음)";
