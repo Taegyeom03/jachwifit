@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { loadMeta } from "@/lib/store";
+import { dateKey, loadLogs, loadMeta, loadMyPrices, loadProfile } from "@/lib/store";
 import { accountsEnabled } from "@/lib/supabase";
 import { deleteAccount, signOut } from "@/lib/sync";
 import { useAppData, type SyncState } from "../useAppData";
@@ -35,6 +35,7 @@ export default function AccountPage() {
       <>
         <h1>내 계정</h1>
         <p className="panel muted">계정 기능을 준비하고 있어요. 지금은 기록이 이 기기에만 저장돼요.</p>
+      <DataExport />
       </>
     );
   }
@@ -55,6 +56,7 @@ export default function AccountPage() {
             로그인 · 회원가입
           </Link>
         </section>
+      <DataExport />
       </>
     );
   }
@@ -128,6 +130,35 @@ export default function AccountPage() {
       <p className="muted small">
         <Link href="/privacy">개인정보 처리방침</Link>
       </p>
+      <DataExport />
     </>
+  );
+}
+
+// 내 기록 백업: 이 기기에 있는 목표 · 기록 · 내 가격을 JSON 파일로 내려받는다 (자동 백업이 없어서 직접 보관용)
+function DataExport() {
+  function download() {
+    const data = {
+      app: "jachwifit",
+      exportedAt: new Date().toISOString(),
+      profile: loadProfile(),
+      logs: loadLogs(),
+      prices: loadMyPrices(),
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `jachwifit-${dateKey(new Date())}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  return (
+    <section className="panel">
+      <h2>내 기록 내려받기</h2>
+      <p className="muted small">목표 · 식사 기록 · 몸무게 · 내 가격을 JSON 파일 하나로 저장해요. 백업용으로 보관하세요.</p>
+      <button type="button" className="button" onClick={download}>
+        JSON 파일로 내려받기
+      </button>
+    </section>
   );
 }
