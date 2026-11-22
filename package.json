@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval:ai": "vitest run --config vitest.eval.config.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.2",
