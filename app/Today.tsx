@@ -6,20 +6,13 @@ import { useEffect, useState } from "react";
 import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
-import { MEALS, dateKey, newId, type Meal } from "@/lib/store";
+import { recipesWithin } from "@/lib/recipes";
+import { MEALS, dateKey, mealByHour, newId } from "@/lib/store";
 import FoodAdder from "./components/FoodAdder";
 import NightSnack from "./components/NightSnack";
 import Recommendations from "./components/Recommendations";
 import { useAppData } from "./useAppData";
 
-// 지금 시각에 맞는 기본 끼니
-function mealByHour(h: number): Meal {
-  if (h < 10) return "아침";
-  if (h < 15) return "점심";
-  if (h < 17) return "간식";
-  if (h < 21) return "저녁";
-  return "야식";
-}
 
 function formatDate(key: string) {
   const [y, m, d] = key.split("-").map(Number);
@@ -234,6 +227,38 @@ export default function Today() {
           updateDay(key, (d) => ({ ...d, rec: stat }));
         }}
       />
+
+      {isToday && kcalLeft > 0 && <RecipeSuggestions kcalLeft={kcalLeft} />}
     </>
+  );
+}
+
+// 남은 칼로리 안에서 만들 수 있는 레시피 (단백질 많은 순 2개)
+function RecipeSuggestions({ kcalLeft }: { kcalLeft: number }) {
+  const picks = recipesWithin(kcalLeft, 2);
+  if (!picks.length) return null;
+  return (
+    <section>
+      <h2>
+        직접 만들어 먹기 <span className="muted small">남은 칼로리 안의 간단 레시피</span>
+      </h2>
+      <div className="combos">
+        {picks.map(({ recipe, totals }) => (
+          <Link key={recipe.id} href="/recipes" className="panel combo recipe-link">
+            <p className="combo-title">{recipe.name}</p>
+            <p className="combo-sum">
+              단백질 <b>{Math.round(totals.protein)}g</b> · {Math.round(totals.kcal)}kcal · 약{" "}
+              {(Math.round(totals.price / 100) * 100).toLocaleString("ko-KR")}원
+            </p>
+            <p className="muted small">
+              {recipe.tool} · {recipe.minutes}분
+            </p>
+          </Link>
+        ))}
+      </div>
+      <p className="muted small">
+        <Link href="/recipes">레시피 전체 보기 →</Link>
+      </p>
+    </section>
   );
 }

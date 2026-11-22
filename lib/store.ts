@@ -5,6 +5,15 @@ import type { Profile } from "./goal";
 export const MEALS = ["아침", "점심", "저녁", "간식", "야식"] as const;
 export type Meal = (typeof MEALS)[number];
 
+// 지금 시각에 맞는 기본 끼니
+export function mealByHour(h: number): Meal {
+  if (h < 10) return "아침";
+  if (h < 15) return "점심";
+  if (h < 17) return "간식";
+  if (h < 21) return "저녁";
+  return "야식";
+}
+
 export type Unit = "serving" | "g";
 
 export type Entry = {
