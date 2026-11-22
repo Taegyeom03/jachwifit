@@ -1291,3 +1291,25 @@ section.panel .weight-input {
   background: none;
   box-shadow: none;
 }
+
+/* 자주 먹는 음식 · 지난 기록 복사 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.copy-day {
+  display: block;
+  width: 100%;
+  margin: 8px 0 16px;
+}

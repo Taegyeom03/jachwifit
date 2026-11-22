@@ -7,6 +7,7 @@ import { findFood } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit, weekBudget } from "@/lib/nutrition";
 import { recipesWithin } from "@/lib/recipes";
+import { copyEntries, frequentFoods, previousLoggedDay } from "@/lib/quickLog";
 import { MEALS, dateKey, mealByHour, newId } from "@/lib/store";
 import AiMealInput from "./components/AiMealInput";
 import WeightInput from "./components/WeightInput";
@@ -63,6 +64,8 @@ export default function Today() {
   const lateEnough = !isToday || new Date().getHours() >= 20;
   const tooLittle = lateEnough && totals.kcal > 0 && totals.kcal < goal.bmr * 0.7;
   const week = isToday ? weekBudget(goal, logs, new Date(), dateKey) : null;
+  // 지난 기록 복사: 오늘이 아직 비어 있을 때만 보여 준다 (같은 걸 두 번 넣지 않게)
+  const prevKey = !day?.entries.length ? previousLoggedDay(logs, key) : null;
 
   const bars = [
     { label: "칼로리", unit: "kcal", value: totals.kcal, target: limit, limit: true },
@@ -190,7 +193,19 @@ export default function Today() {
           updateDay(key, (d) => ({ ...d, entries: [...d.entries, { id: newId(), foodId, amount, unit, meal }] }))
         }
         onSavePrice={setMyPrice}
+        frequent={frequentFoods(logs, key)}
       />
+      {prevKey && (
+        <button
+          type="button"
+          className="button copy-day"
+          onClick={() =>
+            updateDay(key, (d) => ({ ...d, entries: [...d.entries, ...copyEntries(logs[prevKey], newId)] }))
+          }
+        >
+          📋 {formatDate(prevKey)} 식단 그대로 넣기 ({logs[prevKey].entries.length}개)
+        </button>
+      )}
       {saveError && <p className="error">이 브라우저에서는 기록을 저장할 수 없어요. 시크릿 모드인지 확인해 주세요.</p>}
 
       <section className="meals">

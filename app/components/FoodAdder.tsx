@@ -9,10 +9,11 @@ type Props = {
   defaultMeal: Meal;
   onAdd: (foodId: number, amount: number, unit: Unit, meal: Meal) => void;
   onSavePrice?: (foodId: number, price: number | null) => void; // 고른 음식의 가격을 그 자리에서 고친다
+  frequent?: Food[]; // 자주 먹는 음식 (누르면 바로 고름)
 };
 
 // 음식 검색(자동완성) + 양 · 단위 · 끼니 입력
-export default function FoodAdder({ defaultMeal, onAdd, onSavePrice }: Props) {
+export default function FoodAdder({ defaultMeal, onAdd, onSavePrice, frequent = [] }: Props) {
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Food | null>(null);
   const [amount, setAmount] = useState("1");
@@ -52,6 +53,16 @@ export default function FoodAdder({ defaultMeal, onAdd, onSavePrice }: Props) {
     // 가격 입력도 form이라 음식 추가 form 밖에 둔다 (form 안에 form을 넣으면 저장이 음식 추가로 처리됨)
     <div className="panel adder">
       <form onSubmit={handleSubmit}>
+        {!query && frequent.length > 0 && (
+          <div className="chips" aria-label="자주 먹는 음식">
+            <span className="muted small">자주 먹는</span>
+            {frequent.map((f) => (
+              <button key={f.id} type="button" className="chip" onClick={() => pick(f)}>
+                {f.name}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="search">
           <input
             type="search"
