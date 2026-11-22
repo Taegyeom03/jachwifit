@@ -50,8 +50,8 @@ export default function AiMealInput({ loggedIn, defaultMeal, onAdd }: Props) {
         body: JSON.stringify({ text, meal: defaultMeal }),
       });
       const json = await res.json().catch(() => null);
-      if (!res.ok) {
-        setError(json?.error?.message ?? "문제가 생겼어요. 잠시 뒤에 다시 해 주세요.");
+      if (!res.ok || !Array.isArray(json?.items)) {
+        setError(json?.error?.message ?? "AI 응답을 받지 못했어요. 잠시 뒤에 다시 해 주세요.");
         return;
       }
       const items = (json.items as ParsedItem[]).map((it) => ({ ...it, checked: true }));

@@ -71,6 +71,11 @@ export async function POST(req: Request) {
     });
     return Response.json({ ...result, remaining });
   } catch (e) {
+    // AI 쪽 문제(바쁨 · 시간 초과 · 형식 오류)로 실패하면 쓴 횟수를 돌려준다. 돌려주기에 실패해도 오류 응답은 그대로.
+    if (!(e instanceof AiError) || e.status >= 500) {
+      const { error: refundError } = await sb.rpc("ai_refund_quota");
+      if (refundError) console.error(`[parse-meal] 횟수 돌려주기 실패: ${refundError.code ?? ""}`);
+    }
     if (e instanceof AiError) return fail(e.status, e.code, e.message);
     console.error("[parse-meal] 예상하지 못한 오류");
     return fail(500, "unknown", "문제가 생겼어요. 잠시 뒤에 다시 해 주세요.");

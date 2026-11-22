@@ -73,3 +73,20 @@ $$;
 
 revoke all on function public.ai_take_quota(int) from public, anon;
 grant execute on function public.ai_take_quota(int) to authenticated;
+
+-- AI 쪽 문제로 실패한 호출은 오늘 쓴 횟수에서 1번 돌려준다 (0 아래로는 내려가지 않음)
+create or replace function public.ai_refund_quota()
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  update public.ai_usage
+     set count = count - 1
+   where user_id = (select auth.uid())
+     and day = (now() at time zone 'Asia/Seoul')::date
+     and count > 0;
+$$;
+
+revoke all on function public.ai_refund_quota() from public, anon;
+grant execute on function public.ai_refund_quota() to authenticated;

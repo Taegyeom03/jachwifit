@@ -2,7 +2,9 @@
 // "점심에 학식 제육덮밥이랑 공기밥 먹음" → 자취핏 음식 목록에서 음식 id · 양 · 끼니를 찾는다.
 // - 프롬프트(음식 목록 포함)는 서버에 고정하고, 사용자 문장은 "데이터"로만 넘긴다 (프롬프트 인젝션 대비).
 // - 응답은 JSON 스키마로 받고, 서버에서 다시 검사한다 (없는 음식 id · 이상한 양은 버린다).
-// - 429 · 5xx는 1 · 2 · 4초 간격으로 최대 3번 재시도, 4xx는 바로 실패, 한 번에 15초 제한.
+// - 429 · 5xx는 1 · 2 · 4초 간격으로 최대 3번 재시도, 4xx는 바로 실패.
+// - 시간: 수업 기준은 한 번에 15초지만, Netlify 함수가 기본 10초에 끊기므로 전체를 9초 안에 끝낸다
+//   (끊기면 HTML 오류가 와서 화면이 이유를 못 보여 줌). 남은 시간이 모자라면 재시도하지 않는다.
 // - 형식이 틀린 응답이 오면 한 번만 다시 요청한다.
 import type { Food } from "./foods";
 import { MEALS, type Meal } from "./store";
@@ -13,7 +15,9 @@ export const MAX_SERVINGS = 10;
 export const MAX_GRAMS = 2000;
 export const DEFAULT_MODEL = "anthropic/claude-haiku-5.5";
 export const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 8_000; // 한 번 호출 상한
+const TOTAL_MS = 9_000; // 재시도 · 재요청까지 합친 전체 상한 (Netlify 함수 10초 제한 안)
+const MIN_TRY_MS = 1_500; // 이보다 시간이 적게 남으면 새로 시도하지 않는다
 const RETRY_DELAYS = [1000, 2000, 4000];
 
 export type ParsedItem = { foodId: number; amount: number; unit: "serving" | "g"; meal: Meal; matched: string };
@@ -127,17 +131,28 @@ export function normalizeResult(raw: unknown, foods: Food[], defaultMeal: Meal):
 
 type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 export type Usage = { prompt_tokens?: number; completion_tokens?: number; cost?: number };
-type Deps = { fetchImpl?: FetchLike; sleep?: (ms: number) => Promise<void>; onUsage?: (u: Usage) => void };
+type Deps = {
+  fetchImpl?: FetchLike;
+  sleep?: (ms: number) => Promise<void>;
+  onUsage?: (u: Usage) => void;
+  now?: () => number; // 테스트에서 시간을 흉내 낼 때
+};
 
 const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 // 한 번 호출 (429 · 5xx · 네트워크 오류는 재시도, 4xx는 바로 실패)
-async function requestWithRetry(body: unknown, apiKey: string, deps: Deps): Promise<unknown> {
+async function requestWithRetry(body: unknown, apiKey: string, deps: Deps, deadline: number): Promise<unknown> {
   const fetchImpl = deps.fetchImpl ?? fetch;
   const sleep = deps.sleep ?? defaultSleep;
+  const now = deps.now ?? Date.now;
   let lastStatus = 0;
   for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
-    if (attempt > 0) await sleep(RETRY_DELAYS[attempt - 1]);
+    if (attempt > 0) {
+      if (deadline - now() < RETRY_DELAYS[attempt - 1] + MIN_TRY_MS) break; // 기다렸다 다시 할 시간이 없음
+      await sleep(RETRY_DELAYS[attempt - 1]);
+    }
+    const left = deadline - now();
+    if (left < MIN_TRY_MS) break;
     let res: Response;
     try {
       res = await fetchImpl(OPENROUTER_URL, {
@@ -149,12 +164,12 @@ async function requestWithRetry(body: unknown, apiKey: string, deps: Deps): Prom
           "X-Title": "jachwifit",
         },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(Math.min(TIMEOUT_MS, left)),
       });
     } catch (e) {
       const timeout = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
       lastStatus = timeout ? 504 : 0;
-      console.error(`[parse-meal] 호출 실패 (시도 ${attempt + 1}): ${timeout ? "15초 초과" : "네트워크 오류"}`);
+      console.error(`[parse-meal] 호출 실패 (시도 ${attempt + 1}): ${timeout ? "시간 초과" : "네트워크 오류"}`);
       continue;
     }
     if (res.ok) return res.json();
@@ -197,8 +212,11 @@ export async function parseMealText(
     provider: { require_parameters: true }, // 구조화 응답을 지원하는 곳으로만 보낸다
     usage: { include: true }, // 응답에 토큰 수 · 비용(USD)을 받는다
   };
+  const now = deps.now ?? Date.now;
+  const deadline = now() + TOTAL_MS;
   for (let round = 0; round < 2; round++) {
-    const data = await requestWithRetry(body, opts.apiKey, deps);
+    if (round > 0 && deadline - now() < MIN_TRY_MS) break; // 다시 요청할 시간이 없음
+    const data = await requestWithRetry(body, opts.apiKey, deps, deadline);
     const usage = (data as { usage?: Usage })?.usage;
     if (usage) deps.onUsage?.(usage); // 채점 · 비용 계산용 (토큰 수만, 내용은 아님)
     const result = normalizeResult(extractJson(data), opts.foods, opts.defaultMeal);

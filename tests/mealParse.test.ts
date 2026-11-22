@@ -108,7 +108,7 @@ describe("parseMealText (호출 · 재시도)", () => {
     expect(f401).toHaveBeenCalledTimes(1);
   });
 
-  it("15초 타임아웃이 계속되면 504", async () => {
+  it("시간 초과가 계속되면 504", async () => {
     const f = vi.fn(async () => {
       throw Object.assign(new Error("timeout"), { name: "TimeoutError" });
     });
@@ -138,5 +138,23 @@ describe("parseMealText (호출 · 재시도)", () => {
     expect(body.response_format.type).toBe("json_schema");
     expect(body.max_tokens).toBeGreaterThan(0);
     expect(init!.signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+describe("parseMealText (전체 시간 상한 9초)", () => {
+  it("시간이 모자라면 재시도하지 않고 바로 '바빠요'로 끝낸다 (Netlify 10초 제한 안)", async () => {
+    let t = 0;
+    const now = () => t;
+    const f = vi.fn(async () => {
+      t += 8_000; // 한 번 호출에 8초가 걸렸다고 가정
+      return status(429);
+    });
+    await expect(
+      parseMealText(
+        { text: "계란", foods: FOODS, defaultMeal: "점심", apiKey: "k" },
+        { fetchImpl: f, sleep: async () => {}, now },
+      ),
+    ).rejects.toMatchObject({ code: "ai_busy" });
+    expect(f).toHaveBeenCalledTimes(1);
   });
 });
