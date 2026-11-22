@@ -11,7 +11,8 @@
     "start": "next start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "eval:ai": "vitest run --config vitest.eval.config.ts"
+    "eval:ai": "vitest run --config vitest.eval.config.ts parse-meal",
+    "experiment:recommend": "vitest run --config vitest.eval.config.ts greedy-vs-optimal"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.2",

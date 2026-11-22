@@ -32,7 +32,17 @@ export function recommend({
   maxServingsEach = 2,
 }: Options): Combo[] {
   if (proteinGap <= 0 || kcalLeft <= 0) return [];
+  const candidates = candidateFoods({ kcalLeft, includeTags, allowCheat });
+  return greedyCombos(candidates, proteinGap, kcalLeft, maxItems, maxServingsEach);
+}
 
+// 추천 후보: 단백질 · 가격 정보가 있고, 1회분이 남은 칼로리 안인 음식. 단백질 밀도가 높은 음식을 먼저,
+// 단백질 1g당 가격이 싼 순으로 정렬한다 (그리디 · 최적해 비교 실험에서도 같은 후보를 쓴다)
+export function candidateFoods({
+  kcalLeft,
+  includeTags,
+  allowCheat = false,
+}: Pick<Options, "kcalLeft" | "includeTags" | "allowCheat">): Food[] {
   const usable = FOODS.filter(
     (f) =>
       f.protein >= 3 &&
@@ -44,8 +54,16 @@ export function recommend({
   );
   // 싸도 단백질이 적은 음식(땅콩버터 · 오트밀 등)은 칼로리만 쓰므로, 100kcal당 단백질 7g 이상을 먼저 쓴다
   const dense = usable.filter((f) => f.protein / f.kcal >= MIN_PROTEIN_PER_KCAL);
-  const candidates = (dense.length ? dense : usable).sort((a, b) => b.protein / b.price - a.protein / a.price);
+  return (dense.length ? dense : usable).sort((a, b) => b.protein / b.price - a.protein / a.price);
+}
 
+function greedyCombos(
+  candidates: Food[],
+  proteinGap: number,
+  kcalLeft: number,
+  maxItems: number,
+  maxServingsEach: number,
+): Combo[] {
   const combos: Combo[] = [];
   const seen = new Set<string>();
 
