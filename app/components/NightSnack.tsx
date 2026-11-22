@@ -3,7 +3,7 @@
 import { lightSnacks, recommend, type Combo } from "@/lib/recommend";
 import { ComboCards, FoodLine } from "./Recommendations";
 
-// 야식은 어디서 구하느냐로 나눠서, 곳마다 가장 싼 조합을 하나씩 보여 준다 (편의점에만 한정하지 않음)
+// 야식은 어디서 구하느냐로 나눠서, 곳마다 추천 1등 조합(단백질을 가장 많이 채우고, 같으면 더 싼 것)을 하나씩 보여 준다
 const PLACES = [
   { label: "🏪 편의점", tags: ["편의점"], maxItems: 2, maxServingsEach: 2 },
   // 배달 · 외식은 메뉴 하나 1인분이 현실적 (찌개 두 그릇씩 시키지 않음)
@@ -48,7 +48,7 @@ export default function NightSnack({ proteinGap, kcalLeft, allowCheat = false }:
         <section className="panel night">
           <h3>야식으로 단백질 채우기</h3>
           <p className="muted small">
-            편의점 · 배달/외식 · 집에서, 곳마다 가장 싼 조합이에요. 남은 칼로리 {Math.round(kcalLeft)}kcal 안이에요.
+            편의점 · 배달/외식 · 집에서, 곳마다 단백질을 가장 많이 채우는 조합이에요(같으면 더 싼 것). 남은 칼로리 {Math.round(kcalLeft)}kcal 안이에요.
             {allowCheat ? " 치팅데이라 치킨 · 족발 같은 메뉴도 넣었어요." : ""}
           </p>
           <ComboCards combos={picks.map((p) => p.combo)} labels={picks.map((p) => p.label)} />
