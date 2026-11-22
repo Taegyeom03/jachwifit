@@ -126,7 +126,8 @@ export function normalizeResult(raw: unknown, foods: Food[], defaultMeal: Meal):
 }
 
 type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
-type Deps = { fetchImpl?: FetchLike; sleep?: (ms: number) => Promise<void> };
+export type Usage = { prompt_tokens?: number; completion_tokens?: number; cost?: number };
+type Deps = { fetchImpl?: FetchLike; sleep?: (ms: number) => Promise<void>; onUsage?: (u: Usage) => void };
 
 const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -194,9 +195,12 @@ export async function parseMealText(
     max_tokens: 800,
     response_format: { type: "json_schema", json_schema: { name: "meal_log", strict: true, schema: RESPONSE_SCHEMA } },
     provider: { require_parameters: true }, // 구조화 응답을 지원하는 곳으로만 보낸다
+    usage: { include: true }, // 응답에 토큰 수 · 비용(USD)을 받는다
   };
   for (let round = 0; round < 2; round++) {
     const data = await requestWithRetry(body, opts.apiKey, deps);
+    const usage = (data as { usage?: Usage })?.usage;
+    if (usage) deps.onUsage?.(usage); // 채점 · 비용 계산용 (토큰 수만, 내용은 아님)
     const result = normalizeResult(extractJson(data), opts.foods, opts.defaultMeal);
     if (result) return result;
     console.error(`[parse-meal] 응답 형식이 틀림 (${round + 1}번째)`);

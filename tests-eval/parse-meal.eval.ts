@@ -4,7 +4,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { afterAll, describe, expect, it } from "vitest";
 import set from "@/data/ai-test-set.json";
 import { FOODS } from "@/lib/foods";
-import { DEFAULT_MODEL, parseMealText, type ParseResult } from "@/lib/mealParse";
+import { DEFAULT_MODEL, parseMealText, type ParseResult, type Usage } from "@/lib/mealParse";
 import type { Meal } from "@/lib/store";
 
 type Must = { food?: string; foodAny?: string[]; unit?: string; amount?: [number, number]; meal?: string };
@@ -14,6 +14,7 @@ const key = process.env.OPENROUTER_API_KEY;
 const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
 const nameOf = (id: number) => FOODS.find((f) => f.id === id)?.name ?? `#${id}`;
 const rows: string[] = [];
+const usage = { prompt: 0, completion: 0, cost: 0, calls: 0, ms: 0 };
 
 function judge(r: ParseResult, e: Expect): string[] {
   const problems: string[] = [];
@@ -42,7 +43,13 @@ describe.skipIf(!key)(`AI 테스트 세트 (${model})`, () => {
       let got = "";
       let problems: string[] = [];
       try {
-        const r = await parseMealText({ text: c.input, foods: FOODS, defaultMeal: set.defaultMeal as Meal, apiKey: key!, model });
+        const onUsage = (u: Usage) => {
+          usage.prompt += u.prompt_tokens ?? 0;
+          usage.completion += u.completion_tokens ?? 0;
+          usage.cost += u.cost ?? 0;
+          usage.calls++;
+        };
+        const r = await parseMealText({ text: c.input, foods: FOODS, defaultMeal: set.defaultMeal as Meal, apiKey: key!, model }, { onUsage });
         got = r.items.map((it) => `${it.meal} ${nameOf(it.foodId)} ${it.amount}${it.unit === "g" ? "g" : "회"}`).join(", ") || "(없음)";
         if (r.unknown.length) got += ` · 못 찾음: ${r.unknown.join(", ")}`;
         problems = judge(r, c.expect as Expect);
@@ -51,6 +58,7 @@ describe.skipIf(!key)(`AI 테스트 세트 (${model})`, () => {
         problems = ["호출 실패"];
       }
       const ms = Date.now() - started;
+      usage.ms += ms;
       rows.push(`| ${c.id} | ${c.kind} | ${c.input} | ${c.criteria} | ${got} | ${problems.length ? `❌ ${problems.join("; ")}` : "✅"} | ${ms} |`);
       expect(problems, got).toEqual([]);
     });
@@ -59,9 +67,14 @@ describe.skipIf(!key)(`AI 테스트 세트 (${model})`, () => {
   afterAll(() => {
     const pass = rows.filter((r) => r.includes("| ✅ |")).length;
     mkdirSync("reports", { recursive: true });
+    // 모델 비교 스크립트(scripts/eval-models.mjs)가 읽는 요약
+    writeFileSync(
+      "reports/ai-eval-latest.json",
+      JSON.stringify({ model, pass, total: rows.length, avgMs: Math.round(usage.ms / Math.max(1, rows.length)), ...usage }, null, 2),
+    );
     writeFileSync(
       "reports/ai-eval-latest.md",
-      `# 문장으로 기록(AI) 테스트 세트 결과\n\n- 모델: \`${model}\` (OpenRouter)\n- 실행: ${new Date().toISOString()}\n- 결과: **${pass} / ${rows.length} 통과**\n\n| # | 종류 | 입력 | 판정 기준 | 결과 | 판정 | ms |\n|---|---|---|---|---|---|---|\n${rows
+      `# 문장으로 기록(AI) 테스트 세트 결과\n\n- 모델: \`${model}\` (OpenRouter)\n- 실행: ${new Date().toISOString()}\n- 결과: **${pass} / ${rows.length} 통과** · 평균 ${Math.round(usage.ms / Math.max(1, rows.length))}ms · 토큰 입력 ${usage.prompt} / 출력 ${usage.completion} · 비용 약 $${usage.cost.toFixed(4)} (호출 ${usage.calls}번)\n\n| # | 종류 | 입력 | 판정 기준 | 결과 | 판정 | ms |\n|---|---|---|---|---|---|---|\n${rows
         .sort((a, b) => Number(a.split("|")[1]) - Number(b.split("|")[1]))
         .join("\n")}\n`,
     );

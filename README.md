@@ -324,6 +324,10 @@ AI는 [OpenRouter](https://openrouter.ai)를 거쳐 부르고, **서버(`app/api
 
 **안전장치:** 로그인한 사용자만 · 하루 20번 · 200자 · JSON 스키마로 받은 응답을 서버에서 다시 검사(없는 음식 id · 1회 제공량 10배 · 2kg 넘는 양은 버림) · 429/5xx는 1·2·4초 간격 최대 3번 재시도 · 15초 제한 · 형식이 틀리면 한 번 재요청 · 결과는 미리보기에서 사용자가 고른 것만 저장 · 문장 속 지시는 따르지 않도록 프롬프트를 서버에 고정.
 
+**모델 비교:** 키를 넣은 뒤 `npm run eval:models` → 모델 3개(Claude Haiku · GPT-5 nano · Gemini Flash-Lite)를 같은 테스트 세트로 채점해 통과 수 · 응답 시간 · 1회 비용 · 한 달 예상 비용을 `reports/model-compare.md`에 표로 남겨요. 다른 모델은 `npm run eval:models -- 모델id 모델id`.
+
+**데이터 품질 리포트:** `npm run data:quality` → `reports/data-quality.md` (빈 칸 · 형식 · 출처 비율 · 열량 검산 · 범위 확인).
+
 **추천 실험 (그리디 vs 최적해):** `npm run experiment:recommend` → `reports/greedy-vs-optimal.md`. AI 키가 필요 없어요.
 
 **테스트 세트 채점:** `data/ai-test-set.json`에 입력 · 기대 결과 · 판정 기준 10개(경계 · 공격 입력 포함)가 있어요. 키를 넣은 뒤 아래를 실행하면 실제 AI로 채점하고 결과를 `reports/ai-eval-latest.md`에 남겨요(한 번에 약 10번 호출).

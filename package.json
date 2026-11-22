@@ -12,7 +12,9 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "eval:ai": "vitest run --config vitest.eval.config.ts parse-meal",
-    "experiment:recommend": "vitest run --config vitest.eval.config.ts greedy-vs-optimal"
+    "experiment:recommend": "vitest run --config vitest.eval.config.ts greedy-vs-optimal",
+    "data:quality": "node scripts/data-quality.mjs",
+    "eval:models": "node scripts/eval-models.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.2",
