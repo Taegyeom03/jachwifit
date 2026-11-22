@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/", label: "오늘" },
   { href: "/calendar", label: "캘린더" },
   { href: "/insights", label: "인사이트" },
+  { href: "/prices", label: "가격" },
   { href: "/setup", label: "목표" },
 ];
 

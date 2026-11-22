@@ -19,6 +19,10 @@ export type Food = {
 };
 
 export const isTemporary = (source: string) => source.startsWith("임시값");
+export const MY_PRICE_SOURCE = "내가 입력";
+export const isMyPrice = (source: string) => source.startsWith(MY_PRICE_SOURCE);
+// 공공데이터 가격인지 (임시값도, 내가 입력한 값도 아님)
+export const isPublicPrice = (f: Food) => !isTemporary(f.priceSource) && !isMyPrice(f.priceSource);
 
 // 화면에 보여 줄 짧은 출처 (foods.csv의 긴 출처 문장에서 만든다)
 export function nutritionLabel(f: Food): string {
@@ -37,6 +41,7 @@ export function nutritionLabel(f: Food): string {
 export function priceLabel(f: Food): string {
   const s = f.priceSource;
   if (isTemporary(s)) return "가격 임시값";
+  if (isMyPrice(s)) return `가격 내가 입력 (${f.priceDate.slice(5).replace("-", "/")})`;
   if (s.startsWith("KAMIS")) return `가격 KAMIS 서울 소매 (${f.priceDate.slice(5).replace("-", "/")})`;
   const chamga = s.match(/(\d+)건 중앙값/);
   if (s.startsWith("참가격") && chamga) return `가격 참가격 ${chamga[1]}건 중앙값 (${f.priceDate})`;
@@ -46,6 +51,29 @@ export function priceLabel(f: Food): string {
 export const FOODS: Food[] = data;
 
 const byId = new Map(FOODS.map((f) => [f.id, f]));
+
+// 데이터셋 원래 가격 (내 가격을 지우면 이 값으로 되돌린다)
+const ORIGINAL_PRICE = new Map(FOODS.map((f) => [f.id, { price: f.price, priceSource: f.priceSource, priceDate: f.priceDate }]));
+
+export function originalPrice(id: number) {
+  return ORIGINAL_PRICE.get(id);
+}
+
+// 내가 입력한 가격을 음식 데이터에 덮어쓴다. 추천 · 식비 · 식단 예시 · 인사이트가 모두 food.price를 읽으므로 한 곳에서 바꾼다.
+// 내 가격이 없는 음식은 데이터셋 원래 값으로 되돌린다.
+export function applyMyPrices(prices: Record<string, { price: number; date: string }>): void {
+  for (const f of FOODS) {
+    const mine = prices[String(f.id)];
+    const orig = ORIGINAL_PRICE.get(f.id)!;
+    if (mine && mine.price > 0) {
+      f.price = mine.price;
+      f.priceSource = MY_PRICE_SOURCE;
+      f.priceDate = mine.date;
+    } else {
+      Object.assign(f, orig);
+    }
+  }
+}
 
 export function findFood(id: number): Food | undefined {
   return byId.get(id);

@@ -30,7 +30,7 @@ function formatDate(key: string) {
 // 기능 1. 목표 대비 식사 기록 + 기능 2. 추천 카드
 export default function Today() {
   const params = useSearchParams();
-  const { ready, profile, logs, updateDay, saveError } = useAppData();
+  const { ready, profile, logs, updateDay, setMyPrice, saveError } = useAppData();
   const [showSnack, setShowSnack] = useState(false);
   const router = useRouter();
 
@@ -173,6 +173,7 @@ export default function Today() {
         onAdd={(foodId, amount, unit, meal) =>
           updateDay(key, (d) => ({ ...d, entries: [...d.entries, { id: newId(), foodId, amount, unit, meal }] }))
         }
+        onSavePrice={setMyPrice}
       />
       {saveError && <p className="error">이 브라우저에서는 기록을 저장할 수 없어요. 시크릿 모드인지 확인해 주세요.</p>}
 

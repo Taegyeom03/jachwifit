@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { NUTRITION_DATE, PRICE_DATE, isTemporary, nutritionLabel, priceLabel, type Food } from "@/lib/foods";
+import { NUTRITION_DATE, PRICE_DATE, isMyPrice, isTemporary, nutritionLabel, priceLabel, type Food } from "@/lib/foods";
 import { recommend, type Combo } from "@/lib/recommend";
 import type { RecStat } from "@/lib/store";
 
@@ -91,7 +91,9 @@ export function FoodLine({ food, servings }: { food: Food; servings: number }) {
     <li title={`영양: ${food.nutritionSource}\n가격: ${food.priceSource} (${food.priceDate})`}>
       {food.name} {food.servingLabel} × {servings}: 단백질 {Math.round(food.protein * servings * 10) / 10}g ·{" "}
       {Math.round(food.kcal * servings)}kcal · {(food.price * servings).toLocaleString("ko-KR")}원
-      <span className={`source${isTemporary(food.priceSource) || isTemporary(food.nutritionSource) ? " temp" : ""}`}>
+      <span
+        className={`source${isTemporary(food.priceSource) || isTemporary(food.nutritionSource) ? " temp" : isMyPrice(food.priceSource) ? " mine" : ""}`}
+      >
         {nutritionLabel(food)} · {priceLabel(food)}
       </span>
     </li>

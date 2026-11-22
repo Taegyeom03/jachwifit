@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { isTemporary, priceLabel } from "@/lib/foods";
+import { isMyPrice, isPublicPrice, isTemporary, priceLabel } from "@/lib/foods";
 import { calcGoal } from "@/lib/goal";
 import { dayTotals, entryTotals, kcalLimit } from "@/lib/nutrition";
 import { proteinDensityRanking, proteinValueRanking } from "@/lib/recommend";
@@ -17,7 +17,7 @@ export default function InsightsPage() {
   const [publicOnly, setPublicOnly] = useState(false);
 
   const value = proteinValueRanking()
-    .filter((r) => !publicOnly || !isTemporary(r.food.priceSource))
+    .filter((r) => !publicOnly || isPublicPrice(r.food))
     .slice(0, 10);
   const density = proteinDensityRanking().slice(0, 10);
   const bestValue = value[0]?.wonPerGram ?? 1;
@@ -35,6 +35,9 @@ export default function InsightsPage() {
           <input type="checkbox" checked={publicOnly} onChange={(e) => setPublicOnly(e.target.checked)} />
           공공데이터 가격만 보기
         </label>
+        <p className="muted small">
+          임시값 가격은 <Link href="/prices">내 가격</Link>에서 내가 산 가격으로 바꿀 수 있어요.
+        </p>
         <ol className="rank">
           {value.map(({ food, wonPerGram }) => (
             <li key={food.id}>
@@ -45,7 +48,7 @@ export default function InsightsPage() {
               <div className="bar">
                 <div className="bar-fill" style={{ width: `${(bestValue / wonPerGram) * 100}%` }} />
               </div>
-              <span className={`source${isTemporary(food.priceSource) ? " temp" : ""}`}>
+              <span className={`source${isTemporary(food.priceSource) ? " temp" : isMyPrice(food.priceSource) ? " mine" : ""}`}>
                 {food.servingLabel} · 단백질 {food.protein}g · {won(food.price)} · {priceLabel(food)}
               </span>
             </li>

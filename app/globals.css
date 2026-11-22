@@ -792,3 +792,151 @@ h3.sub {
 .plan-hero .stats {
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
+
+/* 내 가격 */
+.source.mine {
+  color: var(--accent);
+}
+
+.price-editor {
+  margin-top: 4px;
+}
+
+.price-editor.compact {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 0.9rem;
+}
+
+.price-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.price-line .source {
+  display: inline;
+  margin-left: 4px;
+}
+
+.price-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.price-actions button.link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.price-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.price-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.price-form .full {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.price-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.price-toolbar input {
+  flex: 1 1 160px;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.tabs button {
+  padding: 6px 12px;
+  font-weight: 500;
+}
+
+.tabs button.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.price-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.price-list li {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.price-list li:first-child {
+  border-top: none;
+}
+
+@media (max-width: 480px) {
+  .price-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .price-form button {
+    grid-column: 1 / -1;
+  }
+  .nav nav a {
+    padding: 6px 7px;
+  }
+}
+
+/* 메뉴 5개가 휴대폰 폭에서 줄바꿈되지 않게 */
+.nav a,
+.nav .brand {
+  white-space: nowrap;
+}
+
+.price-form label {
+  min-width: 0;
+}
+
+.price-form input {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .nav {
+    gap: 6px;
+    padding: 12px;
+  }
+  .nav nav {
+    gap: 0;
+  }
+  .nav nav a {
+    padding: 6px;
+    font-size: 0.9rem;
+  }
+  .nav .brand {
+    font-size: 1.05rem;
+  }
+}

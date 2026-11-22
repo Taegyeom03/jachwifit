@@ -30,8 +30,12 @@ export type DayLog = {
 
 export type Logs = Record<string, DayLog>; // 키: YYYY-MM-DD
 
+// 내가 입력한 가격: 음식 id → 1회 제공량 가격(원)과 입력한 날
+export type MyPrices = Record<string, { price: number; date: string }>;
+
 const PROFILE_KEY = "jachwifit.profile";
 const LOGS_KEY = "jachwifit.logs";
+const PRICES_KEY = "jachwifit.prices";
 
 function read<T>(key: string): T | null {
   try {
@@ -55,6 +59,8 @@ export const loadProfile = () => read<Profile>(PROFILE_KEY);
 export const saveProfile = (p: Profile) => write(PROFILE_KEY, p);
 export const loadLogs = () => read<Logs>(LOGS_KEY) ?? {};
 export const saveLogs = (logs: Logs) => write(LOGS_KEY, logs);
+export const loadMyPrices = () => read<MyPrices>(PRICES_KEY) ?? {};
+export const saveMyPrices = (prices: MyPrices) => write(PRICES_KEY, prices);
 
 // 로컬 시간 기준 날짜 키
 export function dateKey(d: Date): string {
