@@ -26,6 +26,34 @@ const RULES = [
     all: [/단백|프로틴/],
     exclude: /분말|파우더|바$|과자|대두유/,
   },
+
+  // 2026-11-22 추가: 식단 기록에 필요한 음식. 없으면 foods.csv 맨 뒤에 새로 넣는다 (기존 음식 id가 바뀌지 않게).
+  // code: 식품코드 하나를 그대로 쓴다. 가격은 공공데이터가 없어 임시값.
+  {
+    name: "돼지 안심",
+    queries: ["돼지고기"],
+    code: "R109-014008701-0000", // 돼지고기, 안심, 생것
+    add: { serving_label: "1회(100g)", serving_g: 100, price: 1500, tags: "원재료|간단조리" },
+  },
+  {
+    name: "공기밥",
+    queries: ["쌀밥"],
+    code: "D301-022000000-0001", // 쌀밥 (음식)
+    add: { serving_label: "1공기(210g)", serving_g: 210, price: 1000, tags: "간단조리" },
+  },
+  {
+    name: "간장",
+    queries: ["진간장", "양조간장"],
+    match: /간장/,
+    exclude: /소스|불고기|조림|게장|치킨|맛간장|국간장|어간장|분말|드레싱/,
+    add: { serving_label: "1큰술(15ml)", serving_g: 15, price: 50, tags: "간단조리" },
+  },
+  {
+    name: "돼지갈비",
+    queries: ["돼지갈비구이"],
+    code: "D308-373010000-0001", // 돼지갈비구이_간장 (음식)
+    add: { serving_label: "1인분(250g)", serving_g: 250, price: 16000, tags: "치팅" },
+  },
 ];
 
 function loadKey() {
@@ -58,7 +86,7 @@ function baseAmount(s) {
 
 async function search(key, query) {
   const items = [];
-  for (let page = 1; page <= 5; page++) {
+  for (let page = 1; page <= 10; page++) {
     const q = new URLSearchParams({ serviceKey: key, pageNo: page, numOfRows: 100, type: "json", FOOD_NM_KR: query });
     const res = await fetch(`${ENDPOINT}?${q}`);
     const text = await res.text();
@@ -90,10 +118,15 @@ const rows = lines.map((l) => Object.fromEntries(cols.map((c, i) => [c, l.split(
 const today = new Date().toISOString().slice(0, 10);
 
 for (const rule of RULES) {
-  const row = rows.find((r) => r.name === rule.name);
+  let row = rows.find((r) => r.name === rule.name);
   if (!row) {
-    console.log(`${rule.name}: foods.csv에 없음, 건너뜀`);
-    continue;
+    if (!rule.add) {
+      console.log(`${rule.name}: foods.csv에 없음, 건너뜀`);
+      continue;
+    }
+    row = { name: rule.name, ...rule.add, kcal: "", protein: "", carb: "", fat: "", fiber: "", price_source: "임시값", price_date: today };
+    rows.push(row);
+    console.log(`${rule.name}: foods.csv에 새로 추가`);
   }
 
   const seen = new Map();
@@ -102,6 +135,7 @@ for (const rule of RULES) {
   const picked = [...seen.values()].filter((it) => {
     const n = String(it.FOOD_NM_KR ?? "");
     const base = baseAmount(it.SERVING_SIZE);
+    if (rule.code) return it.FOOD_CD === rule.code && base && num(it.AMT_NUM1) != null;
     // 100ml당 20kcal 미만은 기준량 오기입으로 보고 뺀다 (예: 베어그릭스 고단백 두유 7kcal)
     const plausible = base && num(it.AMT_NUM1) != null && (num(it.AMT_NUM1) * 100) / base >= 20;
     return rule.match.test(n) && (rule.all ?? []).every((re) => re.test(n)) && !rule.exclude?.test(n) && plausible;
@@ -128,7 +162,11 @@ for (const rule of RULES) {
     fiber: round1((v.fiber ?? 0) * k),
   };
   const names = picked.slice(0, 3).map((it) => it.FOOD_NM_KR).join("· ");
-  next.nutrition_source = `식품영양성분DB API ${picked.length}개 중앙값 (${names} 등)`.replace(/,/g, "·");
+  next.nutrition_source = (
+    rule.code
+      ? `식품영양성분DB API ${picked[0].FOOD_CD} ${picked[0].FOOD_NM_KR} (${picked[0].DB_GRP_NM})`
+      : `식품영양성분DB API ${picked.length}개 중앙값 (${names} 등)`
+  ).replace(/,/g, "·");
   next.nutrition_date = today;
 
   console.log(`  → ${row.serving_label} 기준: ${row.kcal}→${next.kcal}kcal, 단백질 ${row.protein}→${next.protein}g, 탄수 ${row.carb}→${next.carb}g, 지방 ${row.fat}→${next.fat}g`);

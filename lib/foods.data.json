@@ -1930,5 +1930,82 @@
     "nutritionSource": "음식 D101-010150000-0001 덮밥_돼지고기(제육) (식품의약품안전처)",
     "nutritionDate": "2026-09-29",
     "tags": []
+  },
+  {
+    "id": 101,
+    "name": "돼지 안심",
+    "servingLabel": "1회(100g)",
+    "servingG": 100,
+    "kcal": 123,
+    "protein": 22.2,
+    "carb": 0,
+    "fat": 3.2,
+    "fiber": 0,
+    "price": 1500,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-22",
+    "nutritionSource": "식품영양성분DB API R109-014008701-0000 돼지고기· 안심· 생것 (원재료성)",
+    "nutritionDate": "2026-11-22",
+    "tags": [
+      "원재료",
+      "간단조리"
+    ]
+  },
+  {
+    "id": 102,
+    "name": "공기밥",
+    "servingLabel": "1공기(210g)",
+    "servingG": 210,
+    "kcal": 349,
+    "protein": 7.1,
+    "carb": 78.4,
+    "fat": 0.7,
+    "fiber": 0.2,
+    "price": 1000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-22",
+    "nutritionSource": "식품영양성분DB API D301-022000000-0001 쌀밥 (음식)",
+    "nutritionDate": "2026-11-22",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 103,
+    "name": "간장",
+    "servingLabel": "1큰술(15ml)",
+    "servingG": 15,
+    "kcal": 8,
+    "protein": 0.9,
+    "carb": 0.9,
+    "fat": 0,
+    "fiber": 0,
+    "price": 50,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-22",
+    "nutritionSource": "식품영양성분DB API 254개 중앙값 (네니아낱알메주진간장· 삼화양조진간장· 새미네부엌진간장 등)",
+    "nutritionDate": "2026-11-22",
+    "tags": [
+      "간단조리"
+    ]
+  },
+  {
+    "id": 104,
+    "name": "돼지갈비",
+    "servingLabel": "1인분(250g)",
+    "servingG": 250,
+    "kcal": 600,
+    "protein": 48.8,
+    "carb": 20.3,
+    "fat": 36,
+    "fiber": 0.8,
+    "price": 16000,
+    "priceSource": "임시값",
+    "priceDate": "2026-11-22",
+    "nutritionSource": "식품영양성분DB API D308-373010000-0001 돼지갈비구이_간장 (음식)",
+    "nutritionDate": "2026-11-22",
+    "tags": [
+      "치팅"
+    ]
   }
 ]

@@ -71,6 +71,11 @@ const RULES = [
   { name: "냉동 만두", set: "processed", match: /(고기|김치|왕|교자|물|군)\s?만두$/, exclude: /소스|피$|만두피|전|국|떡|라면|과자|스낵|샐러드|김밥/ },
   { name: "어묵", set: "processed", match: /어묵$|사각\s?어묵|부산\s?어묵/, exclude: /탕|국|볶음|바$|꼬치|소스|스프|김밥|떡볶이|우동|핫바|크림|치즈|칩|스낵/ },
   { name: "단백질 두유", keepTemp: "임시값(제품 라벨 확인 필요)" },
+  // 2026-11-22 추가: fetch-nutrition-api.mjs로 넣는 음식 (API 값 유지)
+  { name: "돼지 안심", keepTemp: "임시값(fetch-nutrition-api.mjs 실행 필요)" },
+  { name: "공기밥", keepTemp: "임시값(fetch-nutrition-api.mjs 실행 필요)" },
+  { name: "간장", keepTemp: "임시값(fetch-nutrition-api.mjs 실행 필요)" },
+  { name: "돼지갈비", keepTemp: "임시값(fetch-nutrition-api.mjs 실행 필요)" },
   { name: "곤약젤리", set: "processed", match: /곤약\s?젤리/ },
   { name: "아메리카노", set: "processed", match: /아메리카노/, exclude: /라떼|스틱|분말|원두|믹스|파우더|캡슐|라테|사탕|캔디|아이스크림|빵|과자|디카페인\s?믹스/ },
 
