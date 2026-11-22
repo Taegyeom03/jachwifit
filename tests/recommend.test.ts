@@ -45,6 +45,17 @@ describe("recommend", () => {
     }
   });
 
+  it("야식 추천의 곳별 후보: 외식 태그만 쓰고, 치팅데이가 아니면 치팅 메뉴는 빠진다", () => {
+    const out = recommend({ proteinGap: 40, kcalLeft: 1200, includeTags: ["외식"] });
+    expect(out.length).toBeGreaterThan(0);
+    for (const c of out) for (const it of c.items) {
+      expect(it.food.tags).toContain("외식");
+      expect(it.food.tags).not.toContain("치팅");
+    }
+    const cheat = recommend({ proteinGap: 40, kcalLeft: 1200, includeTags: ["외식"], allowCheat: true });
+    expect(cheat.length).toBeGreaterThan(0);
+  });
+
   it("야식 모드는 야식 태그 음식만 쓴다", () => {
     for (const c of recommend({ proteinGap: 40, kcalLeft: 700, includeTags: ["야식"] })) {
       for (const it of c.items) expect(it.food.tags).toContain("야식");

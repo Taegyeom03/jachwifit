@@ -1313,3 +1313,11 @@ section.panel .weight-input {
   width: 100%;
   margin: 8px 0 16px;
 }
+
+/* 야식 추천: 어디서 구하는지 */
+.combo-label {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+}

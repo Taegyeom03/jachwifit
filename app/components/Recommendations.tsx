@@ -62,11 +62,13 @@ export default function Recommendations({ proteinGap, kcalLeft, allowCheat, onSt
   );
 }
 
-export function ComboCards({ combos }: { combos: Combo[] }) {
+// labels: 카드마다 위에 붙일 이름 (예: 야식 추천의 "🏪 편의점")
+export function ComboCards({ combos, labels }: { combos: Combo[]; labels?: string[] }) {
   return (
     <div className="combos">
       {combos.map((c, i) => (
         <article key={i} className="panel combo">
+          {labels?.[i] && <p className="combo-label">{labels[i]}</p>}
           <p className="combo-title">
             {c.items.map((it) => `${it.food.name} ${it.servings === 1 ? "" : `×${it.servings}`}`.trim()).join(" + ")}
           </p>

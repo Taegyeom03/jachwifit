@@ -253,7 +253,7 @@ export default function Today() {
       <button type="button" className="snack-btn" onClick={() => setShowSnack((s) => !s)} aria-expanded={showSnack}>
         🌙 {showSnack ? "야식 추천 닫기" : "야식 먹고 싶어"}
       </button>
-      {showSnack && <NightSnack proteinGap={proteinGap} kcalLeft={kcalLeft} />}
+      {showSnack && <NightSnack proteinGap={proteinGap} kcalLeft={kcalLeft} allowCheat={cheat} />}
 
       <Recommendations
         proteinGap={proteinGap}
