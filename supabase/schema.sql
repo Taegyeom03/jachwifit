@@ -1,4 +1,5 @@
 -- 자취핏 계정 연동용 DB (Supabase SQL Editor에 통째로 붙여 넣고 Run)
+-- 이 파일을 실행한 뒤 supabase/migrations/ 의 파일도 번호 순서대로 실행한다 (002: 입력 검사 · AI 호출 제한)
 -- 사용자마다 자기 데이터만 읽고 쓸 수 있다 (Row Level Security).
 
 -- 목표(프로필)와 내 가격: 사용자당 한 줄
