@@ -356,6 +356,7 @@ GitHub `main` 브랜치에 올리면 Netlify가 `npm run build`로 빌드해 htt
 - **PRD (무엇을 왜 만드는가)** · 결정 기록 · 진행 상황: 기획 저장소 [`Taegyeom03/jachifit`](https://github.com/Taegyeom03/jachifit)
   - PRD v3.1: `docs/10_planning/refs/PRD.md`
   - 지금 상태와 다음 할 일: `docs/00_common/handoff.md`
+- 제출 준비 · 최종 점검 결과 · 시연 순서: [docs/submission.md](docs/submission.md)
 - 아직 없는 기능: 데이터셋에 없는 음식 직접 입력, 캘린더 월간 요약, 치팅데이 후 달성일 재계산, 소셜 로그인 (8절 참고)
 
 ## 10. 용어 정리
